@@ -1,0 +1,306 @@
+name: '1.0.0.$(Rev:r)'
+
+trigger:
+- master
+
+variables:
+  buildConfiguration: 'release'
+  tagPrefix: 'v'
+  vmImageName: 'windows-latest'
+
+stages:
+- stage: Build
+  displayName: 'Build Stage'
+
+  jobs:
+  - job: Build
+    displayName: 'Build'
+    pool:
+      vmImage: '$(vmImageName)'
+
+    steps:
+    - task: VersionAssemblies@2
+      displayName: 'Update Version'
+      inputs:
+        Path: '$(Build.SourcesDirectory)'
+        VersionNumber: '$(Build.BuildNumber)'
+        InjectVersion: true
+        FilenamePattern: 'AssemblyInfo.*'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Build Solution'
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (linux-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-x64 -r linux-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (linux-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm -r linux-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (linux-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm64 -r linux-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (win-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-x64 -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (win-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm -r win-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish England (win-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.England/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm64 -r win-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (linux-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-x64 -r linux-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (linux-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm -r linux-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (linux-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm64 -r linux-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (win-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-x64 -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (win-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm -r win-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Scotland (win-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Scotland/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm64 -r win-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (linux-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-x64 -r linux-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (linux-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm -r linux-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (linux-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/linux-arm64 -r linux-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (win-x64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-x64 -r win-x64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (win-arm)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm -r win-arm /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Publish Wales (win-arm64)'
+      inputs:
+        command: 'publish'
+        projects: '**/TransXChange.Wales/*.csproj'
+        arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)/win-arm64 -r win-arm64 /p:PublishSingleFile=true /p:PublishTrimmed=true'
+        publishWebProjects: false
+        zipAfterPublish: false
+
+    - publish: '$(Build.ArtifactStagingDirectory)/linux-x64'
+      displayName: 'Publish Pipeline Artifact (linux-x64)'
+      artifact: 'TransXChange-linux-x64'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/linux-arm'
+      displayName: 'Publish Pipeline Artifact (linux-arm)'
+      artifact: 'TransXChange-linux-arm'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/linux-arm64'
+      displayName: 'Publish Pipeline Artifact (linux-arm64)'
+      artifact: 'TransXChange-linux-arm64'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/win-x64'
+      displayName: 'Publish Pipeline Artifact (win-x64)'
+      artifact: 'TransXChange-win-x64'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/win-arm'
+      displayName: 'Publish Pipeline Artifact (win-arm)'
+      artifact: 'TransXChange-win-arm'
+
+    - publish: '$(Build.ArtifactStagingDirectory)/win-arm64'
+      displayName: 'Publish Pipeline Artifact (win-arm64)'
+      artifact: 'TransXChange-win-arm64'
+
+- stage: Deploy
+  displayName: 'Deploy Stage'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+
+  jobs:
+  - deployment: Deploy
+    displayName: 'Deploy'
+    environment: 'development'
+    pool:
+      vmImage: '$(vmImageName)'
+
+    strategy:
+      runOnce:
+        deploy:
+
+          steps:
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (linux-x64)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-linux-x64'
+              archiveType: 'tar'
+              tarCompression: 'gz'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-linux-x64.tar.gz'
+              replaceExistingArchive: true
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (linux-arm)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-linux-arm'
+              archiveType: 'tar'
+              tarCompression: 'gz'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-linux-arm.tar.gz'
+              replaceExistingArchive: true
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (linux-arm64)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-linux-arm64'
+              archiveType: 'tar'
+              tarCompression: 'gz'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-linux-arm64.tar.gz'
+              replaceExistingArchive: true
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (win-x64)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-win-x64'
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-win-x64.zip'
+              replaceExistingArchive: true
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (win-arm)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-win-arm'
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-win-arm.zip'
+              replaceExistingArchive: true
+
+          - task: ArchiveFiles@2
+            displayName: 'Compress Pipeline Artifact (win-arm64)'
+            inputs:
+              rootFolderOrFile: '$(Pipeline.Workspace)/TransXChange-win-arm64'
+              archiveType: 'zip'
+              archiveFile: '$(Pipeline.Workspace)/TransXChange-win-arm64.zip'
+              replaceExistingArchive: true
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release'
+            inputs:
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: |
+                '$(Pipeline.Workspace)/TransXChange-linux-x64.tar.gz'
+                '$(Pipeline.Workspace)/TransXChange-linux-arm.tar.gz'
+                '$(Pipeline.Workspace)/TransXChange-linux-arm64.tar.gz'
+                '$(Pipeline.Workspace)/TransXChange-win-x64.zip'
+                '$(Pipeline.Workspace)/TransXChange-win-arm.zip'
+                '$(Pipeline.Workspace)/TransXChange-win-arm64.zip'
