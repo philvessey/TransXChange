@@ -288,8 +288,9 @@ stages:
               replaceExistingArchive: true
 
           - task: GitHubRelease@1
-            displayName: 'Publish GitHub Release'
+            displayName: 'Publish GitHub Release (linux-x64)'
             inputs:
+              action: 'edit'
               gitHubConnection: 'GitHub'
               repositoryName: 'philvessey/TransXChange'
               tagSource: 'userSpecifiedTag'
@@ -297,4 +298,75 @@ stages:
               title: '$(tagPrefix)$(Build.BuildNumber)'
               changeLogCompareToRelease: 'lastNonDraftRelease'
               isDraft: true
-              assets: '$(Pipeline.Workspace)/*.tar.gz;$(Pipeline.Workspace)/*.zip'
+              assets: '$(Pipeline.Workspace)/TransXChange-linux-x64.tar.gz'
+              assetUploadMode: 'replace'
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release (linux-arm)'
+            inputs:
+              action: 'edit'
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: '$(Pipeline.Workspace)/TransXChange-linux-arm.tar.gz'
+              assetUploadMode: 'replace'
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release (linux-arm64)'
+            inputs:
+              action: 'edit'
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: '$(Pipeline.Workspace)/TransXChange-linux-arm64.tar.gz'
+              assetUploadMode: 'replace'
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release (win-x64)'
+            inputs:
+              action: 'edit'
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: '$(Pipeline.Workspace)/TransXChange-win-x64.zip'
+              assetUploadMode: 'replace'
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release (win-arm)'
+            inputs:
+              action: 'edit'
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: '$(Pipeline.Workspace)/TransXChange-win-arm.zip'
+              assetUploadMode: 'replace'
+
+          - task: GitHubRelease@1
+            displayName: 'Publish GitHub Release (win-arm64)'
+            inputs:
+              action: 'edit'
+              gitHubConnection: 'GitHub'
+              repositoryName: 'philvessey/TransXChange'
+              tagSource: 'userSpecifiedTag'
+              tag: '$(tagPrefix)$(Build.BuildNumber)'
+              title: '$(tagPrefix)$(Build.BuildNumber)'
+              changeLogCompareToRelease: 'lastNonDraftRelease'
+              isDraft: true
+              assets: '$(Pipeline.Workspace)/TransXChange-win-arm64.zip'
+              assetUploadMode: 'replace'
