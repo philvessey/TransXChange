@@ -297,10 +297,4 @@ stages:
               title: '$(tagPrefix)$(Build.BuildNumber)'
               changeLogCompareToRelease: 'lastNonDraftRelease'
               isDraft: true
-              assets: |
-                '$(Pipeline.Workspace)/TransXChange-linux-x64.tar.gz'
-                '$(Pipeline.Workspace)/TransXChange-linux-arm.tar.gz'
-                '$(Pipeline.Workspace)/TransXChange-linux-arm64.tar.gz'
-                '$(Pipeline.Workspace)/TransXChange-win-x64.zip'
-                '$(Pipeline.Workspace)/TransXChange-win-arm.zip'
-                '$(Pipeline.Workspace)/TransXChange-win-arm64.zip'
+              assets: '$(Pipeline.Workspace)/*.tar.gz;$(Pipeline.Workspace)/*.zip'
