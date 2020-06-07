@@ -149,17 +149,6 @@ namespace TransXChange.Common.Utils
                 }
             }
 
-            if (!result.Monday && !result.Tuesday && !result.Wednesday && !result.Thursday && !result.Friday && !result.Saturday && !result.Sunday)
-            {
-                result.Monday = true;
-                result.Tuesday = true;
-                result.Wednesday = true;
-                result.Thursday = true;
-                result.Friday = true;
-                result.Saturday = true;
-                result.Sunday = true;
-            }
-
             while (startDate <= endDate)
             {
                 if (startDate.DayOfWeek == DayOfWeek.Monday && result.Monday)
