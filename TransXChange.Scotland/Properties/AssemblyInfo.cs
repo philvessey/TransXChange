@@ -2,4 +2,4 @@
 
 [assembly: AssemblyCopyright("Copyright © 2020 Phil Vessey and Contributors")]
 [assembly: AssemblyTitle("TransXChange.Scotland")]
-[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.1.0.0")]

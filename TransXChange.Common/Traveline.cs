@@ -20,14 +20,14 @@ namespace TransXChange.Common
 
             if (path.EndsWith(".zip"))
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (File.Exists(path))
                 {
                     using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Read);
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.Name.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry.Open());
@@ -555,14 +555,14 @@ namespace TransXChange.Common
             }
             else
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (Directory.Exists(path))
                 {
                     string[] entries = Directory.GetFiles(path);
 
                     foreach (string entry in entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry);
@@ -1098,14 +1098,14 @@ namespace TransXChange.Common
 
             if (path.EndsWith(".zip"))
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (File.Exists(path))
                 {
                     using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Read);
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.Name.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry.Open());
@@ -1693,14 +1693,14 @@ namespace TransXChange.Common
             }
             else
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (Directory.Exists(path))
                 {
                     string[] entries = Directory.GetFiles(path);
 
                     foreach (string entry in entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry);
@@ -2296,14 +2296,14 @@ namespace TransXChange.Common
 
             if (path.EndsWith(".zip"))
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (File.Exists(path))
                 {
                     using ZipArchive archive = ZipFile.Open(path, ZipArchiveMode.Read);
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.Name.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry.Open());
@@ -2831,14 +2831,14 @@ namespace TransXChange.Common
             }
             else
             {
+                DateTime now = DateTime.Now.Date;
+
                 if (Directory.Exists(path))
                 {
                     string[] entries = Directory.GetFiles(path);
 
                     foreach (string entry in entries)
                     {
-                        DateTime now = DateTime.Now.Date;
-
                         if (entry.EndsWith(".xml"))
                         {
                             using StreamReader reader = new StreamReader(entry);
