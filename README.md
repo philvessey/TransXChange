@@ -14,16 +14,16 @@ Ensure you already have:
 ## Usage
 
 ```
-TransXChange.England > dotnet run -n [naptan] -t [traveline] -o [output] -m (mode) -f (filters) -d (days)
-TransXChange.Scotland > dotnet run -n [naptan] -t [traveline] -o [output] -m (mode) -f (filters) -d (days)
-TransXChange.Wales > dotnet run -n [naptan] -t [traveline] -o [output] -m (mode) -f (filters) -d (days)
+TransXChange.England > dotnet run -n [--naptan] -t [--traveline] -o [--output] (--mode) (--filters) (--days)
+TransXChange.Scotland > dotnet run -n [--naptan] -t [--traveline] -o [--output] (--mode) (--filters) (--days)
+TransXChange.Wales > dotnet run -n [--naptan] -t [--traveline] -o [--output] (--mode) (--filters) (--days)
 ```
 
 * [naptan] > Path to NaPTAN csv .zip or directory. Required.
 * [traveline] > Path to regional Traveline TNDS .zip or directory. Required.
 * [output] > Path to output directory. Required.
-* (mode) > Specify transport mode. Default (all). Optional. Modes: all, bus, city-rail, ferry, light-rail
-* (filters) > Specify stop filters. Default (all). Optional. Separate by comma.
+* (mode) > Specify transport mode for schedules. Default (all). Optional. Modes: all, bus, city-rail, ferry, light-rail
+* (filters) > Specify stop filters for schedules. Default (all). Optional. Separate by comma.
 * (days) > Specify days in advance for schedules. Default (7). Optional. Maximum is 28 days.
 
 ## License
