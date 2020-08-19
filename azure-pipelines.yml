@@ -14,7 +14,7 @@ stages:
 
   jobs:
   - job: Build
-    displayName: 'Build'
+    displayName: 'Build Job'
     pool:
       vmImage: '$(vmImageName)'
 
@@ -226,7 +226,7 @@ stages:
 
   jobs:
   - deployment: Deploy
-    displayName: 'Deploy'
+    displayName: 'Deploy Job'
     environment: 'development'
     pool:
       vmImage: '$(vmImageName)'
