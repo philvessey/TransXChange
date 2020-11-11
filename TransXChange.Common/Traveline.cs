@@ -402,10 +402,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -937,10 +937,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -1540,10 +1540,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -2135,10 +2135,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -2678,10 +2678,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -3213,10 +3213,10 @@ namespace TransXChange.Common
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
