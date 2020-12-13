@@ -394,9 +394,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
@@ -929,9 +929,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
@@ -1532,9 +1532,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
@@ -2127,9 +2127,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
@@ -2670,9 +2670,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
@@ -3205,9 +3205,9 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
