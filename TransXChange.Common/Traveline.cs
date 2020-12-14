@@ -45,6 +45,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -576,6 +581,11 @@ namespace TransXChange.Common
                                 DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
 
                                 if (startDate == null || endDate == null)
+                                {
+                                    continue;
+                                }
+
+                                if (startDate > endDate || endDate < startDate)
                                 {
                                     continue;
                                 }
@@ -1119,6 +1129,11 @@ namespace TransXChange.Common
                                 DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
 
                                 if (startDate == null || endDate == null)
+                                {
+                                    continue;
+                                }
+
+                                if (startDate > endDate || endDate < startDate)
                                 {
                                     continue;
                                 }
@@ -1714,6 +1729,11 @@ namespace TransXChange.Common
                                 DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
 
                                 if (startDate == null || endDate == null)
+                                {
+                                    continue;
+                                }
+
+                                if (startDate > endDate || endDate < startDate)
                                 {
                                     continue;
                                 }
@@ -2321,6 +2341,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -2852,6 +2877,11 @@ namespace TransXChange.Common
                                 DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
 
                                 if (startDate == null || endDate == null)
+                                {
+                                    continue;
+                                }
+
+                                if (startDate > endDate || endDate < startDate)
                                 {
                                     continue;
                                 }
