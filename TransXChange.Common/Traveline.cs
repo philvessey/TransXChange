@@ -58,6 +58,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -598,6 +604,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -1146,6 +1158,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -1746,6 +1764,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -2354,6 +2378,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -2894,6 +2924,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
