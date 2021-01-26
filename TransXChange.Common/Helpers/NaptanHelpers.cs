@@ -5,9 +5,9 @@ using System.IO;
 using System.IO.Compression;
 using TransXChange.Common.Models;
 
-namespace TransXChange.Common
+namespace TransXChange.Common.Helpers
 {
-    public static class Naptan
+    public static class NaptanHelpers
     {
         public static Dictionary<string, NAPTANStop> Read(string path)
         {

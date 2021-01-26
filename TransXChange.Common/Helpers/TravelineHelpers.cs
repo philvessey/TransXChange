@@ -10,9 +10,9 @@ using TransXChange.Common.Extensions;
 using TransXChange.Common.Models;
 using TransXChange.Common.Utils;
 
-namespace TransXChange.Common
+namespace TransXChange.Common.Helpers
 {
-    public static class Traveline
+    public static class TravelineHelpers
     {
         public static Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {

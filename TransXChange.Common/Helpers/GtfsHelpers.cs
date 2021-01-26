@@ -7,9 +7,9 @@ using System.Linq;
 using TransXChange.Common.Extensions;
 using TransXChange.Common.Models;
 
-namespace TransXChange.Common
+namespace TransXChange.Common.Helpers
 {
-    public static class Gtfs
+    public static class GtfsHelpers
     {
         private static Dictionary<string, GTFSAgency> _agencies = new Dictionary<string, GTFSAgency>();
         private static Dictionary<string, GTFSCalendar> _calendars = new Dictionary<string, GTFSCalendar>();
