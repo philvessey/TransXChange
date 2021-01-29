@@ -12,9 +12,9 @@ using TransXChange.Common.Utils;
 
 namespace TransXChange.Common.Helpers
 {
-    public static class TravelineHelpers
+    public class TravelineHelpers
     {
-        public static Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -1114,7 +1114,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -2334,7 +2334,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -3434,7 +3434,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ScanDuplicate(Dictionary<string, TXCSchedule> originals)
+        public Dictionary<string, TXCSchedule> ScanDuplicate(Dictionary<string, TXCSchedule> originals)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 

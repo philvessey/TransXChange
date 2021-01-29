@@ -25,37 +25,41 @@ namespace TransXChange.Wales
             Console.WriteLine(CopyrightInfo.Default);
             Console.WriteLine("");
 
-            Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read(options.Naptan);
+            GtfsHelpers gtfsHelpers = new GtfsHelpers();
+            NaptanHelpers naptanHelpers = new NaptanHelpers();
+            TravelineHelpers travelineHelpers = new TravelineHelpers();
+
+            Dictionary<string, NAPTANStop> stops = naptanHelpers.Read(options.Naptan);
             Console.WriteLine(string.Format("READ: National Public Transport Access Nodes (NaPTAN). Found {0:#,##0.##} stops.", stops.Count));
 
-            Dictionary<string, TXCSchedule> originals = TravelineHelpers.ReadWales(stops, options.Traveline, options.Mode, options.Filters, options.Days);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadWales(stops, options.Traveline, options.Mode, options.Filters, options.Days);
             Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} original schedules.", originals.Count));
 
-            Dictionary<string, TXCSchedule> duplicates = TravelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
             Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} duplicate schedules.", duplicates.Count));
 
             Directory.CreateDirectory(options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", options.Output));
 
-            GtfsHelpers.WriteAgency(originals, duplicates, options.Output);
+            gtfsHelpers.WriteAgency(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "agency.txt")));
 
-            GtfsHelpers.WriteCalendar(originals, duplicates, options.Output);
+            gtfsHelpers.WriteCalendar(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "calendar.txt")));
 
-            GtfsHelpers.WriteCalendarDates(originals, duplicates, options.Output);
+            gtfsHelpers.WriteCalendarDates(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "calendar_dates.txt")));
 
-            GtfsHelpers.WriteRoutes(originals, duplicates, options.Output);
+            gtfsHelpers.WriteRoutes(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "routes.txt")));
 
-            GtfsHelpers.WriteStops(originals, duplicates, options.Output);
+            gtfsHelpers.WriteStops(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "stops.txt")));
 
-            GtfsHelpers.WriteStopTimes(originals, duplicates, options.Output);
+            gtfsHelpers.WriteStopTimes(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "stop_times.txt")));
 
-            GtfsHelpers.WriteTrips(originals, duplicates, options.Output);
+            gtfsHelpers.WriteTrips(originals, duplicates, options.Output);
             Console.WriteLine(string.Format("WRITE: {0}", Path.Combine(options.Output, "trips.txt")));
         }
     }

@@ -9,17 +9,17 @@ using TransXChange.Common.Models;
 
 namespace TransXChange.Common.Helpers
 {
-    public static class GtfsHelpers
+    public class GtfsHelpers
     {
-        private static Dictionary<string, GTFSAgency> _agencies = new Dictionary<string, GTFSAgency>();
-        private static Dictionary<string, GTFSCalendar> _calendars = new Dictionary<string, GTFSCalendar>();
-        private static Dictionary<string, GTFSCalendarDate> _calendarDates = new Dictionary<string, GTFSCalendarDate>();
-        private static Dictionary<string, GTFSRoute> _routes = new Dictionary<string, GTFSRoute>();
-        private static Dictionary<string, GTFSStop> _stops = new Dictionary<string, GTFSStop>();
-        private static Dictionary<string, GTFSStopTime> _stopTimes = new Dictionary<string, GTFSStopTime>();
-        private static Dictionary<string, GTFSTrip> _trips = new Dictionary<string, GTFSTrip>();
+        private Dictionary<string, GTFSAgency> _agencies = new Dictionary<string, GTFSAgency>();
+        private Dictionary<string, GTFSCalendar> _calendars = new Dictionary<string, GTFSCalendar>();
+        private Dictionary<string, GTFSCalendarDate> _calendarDates = new Dictionary<string, GTFSCalendarDate>();
+        private Dictionary<string, GTFSRoute> _routes = new Dictionary<string, GTFSRoute>();
+        private Dictionary<string, GTFSStop> _stops = new Dictionary<string, GTFSStop>();
+        private Dictionary<string, GTFSStopTime> _stopTimes = new Dictionary<string, GTFSStopTime>();
+        private Dictionary<string, GTFSTrip> _trips = new Dictionary<string, GTFSTrip>();
 
-        public static void WriteAgency(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteAgency(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareAgency(originals, duplicates);
 
@@ -36,7 +36,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteCalendar(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteCalendar(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareCalendar(originals, duplicates);
 
@@ -53,7 +53,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteCalendarDates(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteCalendarDates(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareCalendarDates(originals, duplicates);
 
@@ -70,7 +70,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteRoutes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteRoutes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareRoutes(originals, duplicates);
 
@@ -87,7 +87,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteStops(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteStops(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareStops(originals, duplicates);
 
@@ -104,7 +104,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteStopTimes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteStopTimes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareStopTimes(originals, duplicates);
 
@@ -121,7 +121,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public static void WriteTrips(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
+        public void WriteTrips(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates, string path)
         {
             PrepareTrips(originals, duplicates);
 
@@ -138,7 +138,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        private static void PrepareAgency(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareAgency(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -165,7 +165,7 @@ namespace TransXChange.Common.Helpers
             _agencies = _agencies.OrderBy(a => a.Value.AgencyId).ToDictionary(a => a.Key, a => a.Value);
         }
 
-        private static void PrepareCalendar(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareCalendar(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -194,7 +194,7 @@ namespace TransXChange.Common.Helpers
             _calendars = _calendars.OrderBy(c => c.Value.ServiceId).ToDictionary(c => c.Key, c => c.Value);
         }
 
-        private static void PrepareCalendarDates(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareCalendarDates(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -236,7 +236,7 @@ namespace TransXChange.Common.Helpers
             _calendarDates = _calendarDates.OrderBy(c => c.Value.ServiceId).ToDictionary(c => c.Key, c => c.Value);
         }
 
-        private static void PrepareRoutes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareRoutes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -260,7 +260,7 @@ namespace TransXChange.Common.Helpers
             _routes = _routes.OrderBy(r => r.Value.RouteId).ToDictionary(r => r.Key, r => r.Value);
         }
 
-        private static void PrepareStops(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareStops(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -289,7 +289,7 @@ namespace TransXChange.Common.Helpers
             _stops = _stops.OrderBy(s => s.Value.StopId).ToDictionary(s => s.Key, s => s.Value);
         }
 
-        private static void PrepareStopTimes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareStopTimes(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
@@ -350,7 +350,7 @@ namespace TransXChange.Common.Helpers
             _stopTimes = _stopTimes.OrderBy(s => s.Value.TripId).ToDictionary(s => s.Key, s => s.Value);
         }
 
-        private static void PrepareTrips(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
+        private void PrepareTrips(Dictionary<string, TXCSchedule> originals, Dictionary<string, TXCSchedule> duplicates)
         {
             foreach (TXCSchedule schedule in originals.Values)
             {

@@ -7,9 +7,9 @@ using TransXChange.Common.Models;
 
 namespace TransXChange.Common.Helpers
 {
-    public static class NaptanHelpers
+    public class NaptanHelpers
     {
-        public static Dictionary<string, NAPTANStop> Read(string path)
+        public Dictionary<string, NAPTANStop> Read(string path)
         {
             Dictionary<string, NAPTANStop> dictionary = new Dictionary<string, NAPTANStop>();
 
