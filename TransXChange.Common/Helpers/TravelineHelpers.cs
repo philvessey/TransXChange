@@ -3444,9 +3444,53 @@ namespace TransXChange.Common.Helpers
                 {
                     for (int i = 1; i <= schedule.Calendar.RunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {
@@ -3466,12 +3510,59 @@ namespace TransXChange.Common.Helpers
                             }
                         }
                     }
+                }
 
+                if (!dictionary.ContainsKey(schedule.Id))
+                {
                     for (int i = 1; i <= schedule.Calendar.SupplementRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {
@@ -3491,12 +3582,59 @@ namespace TransXChange.Common.Helpers
                             }
                         }
                     }
+                }
 
+                if (!dictionary.ContainsKey(schedule.Id))
+                {
                     for (int i = 1; i <= schedule.Calendar.SupplementNonRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {
