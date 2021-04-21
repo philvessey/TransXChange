@@ -10,11 +10,11 @@ using TransXChange.Common.Extensions;
 using TransXChange.Common.Models;
 using TransXChange.Common.Utils;
 
-namespace TransXChange.Common
+namespace TransXChange.Common.Helpers
 {
-    public static class Traveline
+    public class TravelineHelpers
     {
-        public static Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -45,6 +45,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -53,6 +58,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -394,18 +405,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -580,6 +591,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -588,6 +604,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -929,18 +951,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -1092,7 +1114,7 @@ namespace TransXChange.Common
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -1123,6 +1145,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -1131,6 +1158,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -1532,18 +1565,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -1718,6 +1751,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -1726,6 +1764,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -2127,18 +2171,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -2290,7 +2334,7 @@ namespace TransXChange.Common
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string mode, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -2321,6 +2365,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -2329,6 +2378,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -2670,18 +2725,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -2856,6 +2911,11 @@ namespace TransXChange.Common
                                     continue;
                                 }
 
+                                if (startDate > endDate || endDate < startDate)
+                                {
+                                    continue;
+                                }
+
                                 string journeyPatternReference = vehicleJourney.JourneyPatternRef;
 
                                 if (journeyPatternReference == null)
@@ -2864,6 +2924,12 @@ namespace TransXChange.Common
                                 }
 
                                 TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                if (journeyPattern == null)
+                                {
+                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                }
+
                                 TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
 
                                 if (operatingProfile == null)
@@ -3205,18 +3271,18 @@ namespace TransXChange.Common
                                     }
                                 }
 
-                                calendar.RunningDates = calendar.RunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.OrderBy(d => d).ToList();
+                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
                                 TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                 TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
                                 TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection.JourneyPatternTimingLink;
+                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings.Count; i++)
+                                for (int i = 1; i <= patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
@@ -3368,7 +3434,7 @@ namespace TransXChange.Common
             return dictionary;
         }
 
-        public static Dictionary<string, TXCSchedule> ScanDuplicate(Dictionary<string, TXCSchedule> originals)
+        public Dictionary<string, TXCSchedule> ScanDuplicate(Dictionary<string, TXCSchedule> originals)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -3378,9 +3444,53 @@ namespace TransXChange.Common
                 {
                     for (int i = 1; i <= schedule.Calendar.RunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {
@@ -3400,12 +3510,59 @@ namespace TransXChange.Common
                             }
                         }
                     }
+                }
 
+                if (!dictionary.ContainsKey(schedule.Id))
+                {
                     for (int i = 1; i <= schedule.Calendar.SupplementRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {
@@ -3425,12 +3582,59 @@ namespace TransXChange.Common
                             }
                         }
                     }
+                }
 
+                if (!dictionary.ContainsKey(schedule.Id))
+                {
                     for (int i = 1; i <= schedule.Calendar.SupplementNonRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> duplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
 
-                        foreach (TXCSchedule duplicate in duplicates)
+                        foreach (TXCSchedule duplicate in runningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
+                        {
+                            if (!dictionary.ContainsKey(duplicate.Id))
+                            {
+                                if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                                {
+                                    if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                                    {
+                                        if (schedule.Line == duplicate.Line)
+                                        {
+                                            if (!dictionary.ContainsKey(duplicate.Id))
+                                            {
+                                                dictionary.Add(duplicate.Id, duplicate);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+
+                        foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
                             if (!dictionary.ContainsKey(duplicate.Id))
                             {

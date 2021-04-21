@@ -1,4 +1,4 @@
-name: '1.1.1.$(Rev:r)'
+name: '1.1.2.$(Rev:r)'
 
 trigger:
 - master
@@ -9,18 +9,18 @@ variables:
   vmImageName: 'windows-latest'
 
 stages:
-- stage: Build
-  displayName: 'Build Stage'
+- stage: 'buildSolution'
+  displayName: 'Build Solution Stage'
 
   jobs:
-  - job: Build
-    displayName: 'Build'
+  - job: 'buildSolution'
+    displayName: 'Build Solution Job'
     pool:
       vmImage: '$(vmImageName)'
 
     steps:
     - task: VersionAssemblies@2
-      displayName: 'Update Version'
+      displayName: 'Update Version Number'
       inputs:
         Path: '$(Build.SourcesDirectory)'
         VersionNumber: '$(Build.BuildNumber)'
@@ -28,14 +28,14 @@ stages:
         FilenamePattern: 'AssemblyInfo.*'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Build Solution'
+      displayName: 'Build All Projects'
       inputs:
         command: 'build'
         projects: '**/*.csproj'
         arguments: '--configuration $(buildConfiguration)'
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (linux-x64)'
+      displayName: 'Publish England Project (linux-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -44,7 +44,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (linux-arm)'
+      displayName: 'Publish England Project (linux-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -53,7 +53,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (linux-arm64)'
+      displayName: 'Publish England Project (linux-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -62,7 +62,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (win-x64)'
+      displayName: 'Publish England Project (win-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -71,7 +71,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (win-arm)'
+      displayName: 'Publish England Project (win-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -80,7 +80,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish England (win-arm64)'
+      displayName: 'Publish England Project (win-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.England/*.csproj'
@@ -89,7 +89,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (linux-x64)'
+      displayName: 'Publish Scotland Project (linux-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -98,7 +98,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (linux-arm)'
+      displayName: 'Publish Scotland Project (linux-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -107,7 +107,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (linux-arm64)'
+      displayName: 'Publish Scotland Project (linux-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -116,7 +116,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (win-x64)'
+      displayName: 'Publish Scotland Project (win-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -125,7 +125,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (win-arm)'
+      displayName: 'Publish Scotland Project (win-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -134,7 +134,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Scotland (win-arm64)'
+      displayName: 'Publish Scotland Project (win-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Scotland/*.csproj'
@@ -143,7 +143,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (linux-x64)'
+      displayName: 'Publish Wales Project (linux-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -152,7 +152,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (linux-arm)'
+      displayName: 'Publish Wales Project (linux-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -161,7 +161,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (linux-arm64)'
+      displayName: 'Publish Wales Project (linux-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -170,7 +170,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (win-x64)'
+      displayName: 'Publish Wales Project (win-x64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -179,7 +179,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (win-arm)'
+      displayName: 'Publish Wales Project (win-arm)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -188,7 +188,7 @@ stages:
         zipAfterPublish: false
 
     - task: DotNetCoreCLI@2
-      displayName: 'Publish Wales (win-arm64)'
+      displayName: 'Publish Wales Project (win-arm64)'
       inputs:
         command: 'publish'
         projects: '**/TransXChange.Wales/*.csproj'
@@ -220,13 +220,13 @@ stages:
       displayName: 'Publish Pipeline Artifact (win-arm64)'
       artifact: 'TransXChange-win-arm64'
 
-- stage: Deploy
-  displayName: 'Deploy Stage'
+- stage: 'deployPackages'
+  displayName: 'Deploy Packages Stage'
   condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
   jobs:
-  - deployment: Deploy
-    displayName: 'Deploy'
+  - deployment: 'deployPackages'
+    displayName: 'Deploy Packages Job'
     environment: 'development'
     pool:
       vmImage: '$(vmImageName)'

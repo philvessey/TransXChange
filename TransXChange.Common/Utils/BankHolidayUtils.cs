@@ -26,7 +26,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -54,7 +54,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties.Contains("GB-SCT")).LastOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-SCT")).LastOrDefault();
 
             if (holiday != null)
             {
@@ -124,7 +124,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties.Contains("GB-SCT")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-SCT")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -138,7 +138,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
