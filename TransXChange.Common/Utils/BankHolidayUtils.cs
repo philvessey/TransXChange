@@ -26,7 +26,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -54,7 +54,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-SCT")).LastOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-SCT")).LastOrDefault();
 
             if (holiday != null)
             {
@@ -68,7 +68,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Good Friday").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Good Friday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -82,7 +82,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Easter Monday").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Easter Monday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -96,7 +96,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Early May Bank Holiday").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Early May Bank Holiday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -110,7 +110,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Spring Bank Holiday").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Spring Bank Holiday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -124,7 +124,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-SCT")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-SCT")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -138,7 +138,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -166,7 +166,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Saint Andrew's Day").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Saint Andrew's Day").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -208,7 +208,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Christmas Day").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Christmas Day").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -236,7 +236,7 @@ namespace TransXChange.Common.Utils
         {
             List<PublicHoliday> results = new List<PublicHoliday>();
 
-            PublicHoliday holiday = DateSystem.GetPublicHoliday(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Boxing Day").FirstOrDefault();
+            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Boxing Day").FirstOrDefault();
 
             if (holiday != null)
             {
