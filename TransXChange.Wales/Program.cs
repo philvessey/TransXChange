@@ -66,7 +66,10 @@ namespace TransXChange.Wales
             }
             catch (Exception exception)
             {
-                Console.WriteLine(string.Format("ERROR: {0}", exception.Message));
+                Console.Error.WriteLine(string.Format("ERROR: {0}", exception.Message));
+                Console.WriteLine("");
+
+                Environment.Exit(1);
             }
         }
     }
