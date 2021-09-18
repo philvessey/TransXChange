@@ -278,6 +278,15 @@ namespace TransXChange.Common.Helpers
                         LevelId = ""
                     };
 
+                    if (schedule.Stops[i - 1].NaptanStop.StopType == "PLT" || schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
+                    {
+                        stop.WheelchairBoarding = "1";
+                    }
+                    else
+                    {
+                        stop.WheelchairBoarding = "0";
+                    }
+
                     if (schedule.Stops[i - 1].NaptanStop.StopType == "BCS" || schedule.Stops[i - 1].NaptanStop.StopType == "BCQ")
                     {
                         if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("bay"))
