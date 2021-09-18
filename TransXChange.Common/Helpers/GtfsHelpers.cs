@@ -274,7 +274,8 @@ namespace TransXChange.Common.Helpers
                         StopLat = schedule.Stops[i - 1].NaptanStop.Latitude,
                         StopLon = schedule.Stops[i - 1].NaptanStop.Longitude,
                         LocationType = "0",
-                        StopTimezone = "Europe/London"
+                        StopTimezone = "Europe/London",
+                        LevelId = ""
                     };
 
                     if (schedule.Stops[i - 1].NaptanStop.StopType == "BCS" || schedule.Stops[i - 1].NaptanStop.StopType == "BCQ")
