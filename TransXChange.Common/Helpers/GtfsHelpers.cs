@@ -277,6 +277,66 @@ namespace TransXChange.Common.Helpers
                         StopTimezone = "Europe/London"
                     };
 
+                    if (schedule.Stops[i - 1].NaptanStop.StopType == "BCS" || schedule.Stops[i - 1].NaptanStop.StopType == "BCQ")
+                    {
+                        if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("bay"))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stance"))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stand"))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stop"))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("/"))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("/").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("bay "))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("bay ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stance "))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stance ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stand "))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stand ").LastOrDefault().Trim();
+                        }
+                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stop "))
+                        {
+                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stop ").LastOrDefault().Trim();
+                        }
+                        else
+                        {
+                            stop.PlatformCode = "";
+                        }
+                    }
+                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "LPL")
+                    {
+                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
+                    }
+                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "PLT")
+                    {
+                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
+                    }
+                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
+                    {
+                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
+                    }
+                    else
+                    {
+                        stop.PlatformCode = "";
+                    }
+
                     string id = stop.StopId;
 
                     if (!duplicates.ContainsKey(schedule.Id) && !_stops.ContainsKey(id))
