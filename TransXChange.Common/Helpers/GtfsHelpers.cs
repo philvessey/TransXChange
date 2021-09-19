@@ -273,10 +273,21 @@ namespace TransXChange.Common.Helpers
                         StopName = schedule.Stops[i - 1].NaptanStop.CommonName,
                         StopLat = schedule.Stops[i - 1].NaptanStop.Latitude,
                         StopLon = schedule.Stops[i - 1].NaptanStop.Longitude,
-                        LocationType = "0",
-                        StopTimezone = "Europe/London",
-                        LevelId = ""
+                        StopTimezone = "Europe/London"
                     };
+
+                    if (schedule.Stops[i - 1].NaptanStop.StopType == "BST" || schedule.Stops[i - 1].NaptanStop.StopType == "FER" || schedule.Stops[i - 1].NaptanStop.StopType == "GAT" || schedule.Stops[i - 1].NaptanStop.StopType == "LCB" || schedule.Stops[i - 1].NaptanStop.StopType == "MET" || schedule.Stops[i - 1].NaptanStop.StopType == "RLY")
+                    {
+                        stop.LocationType = "1";
+                    }
+                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "AIR" || schedule.Stops[i - 1].NaptanStop.StopType == "BCE" || schedule.Stops[i - 1].NaptanStop.StopType == "FTD" || schedule.Stops[i - 1].NaptanStop.StopType == "LSE" || schedule.Stops[i - 1].NaptanStop.StopType == "RSE" || schedule.Stops[i - 1].NaptanStop.StopType == "TMU")
+                    {
+                        stop.LocationType = "2";
+                    }
+                    else
+                    {
+                        stop.LocationType = "0";
+                    }
 
                     if (schedule.Stops[i - 1].NaptanStop.StopType == "PLT" || schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
                     {
@@ -325,26 +336,10 @@ namespace TransXChange.Common.Helpers
                         {
                             stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stop ").LastOrDefault().Trim();
                         }
-                        else
-                        {
-                            stop.PlatformCode = "";
-                        }
                     }
-                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "LPL")
+                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "LPL" || schedule.Stops[i - 1].NaptanStop.StopType == "PLT" || schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
                     {
                         stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
-                    }
-                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "PLT")
-                    {
-                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
-                    }
-                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
-                    {
-                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
-                    }
-                    else
-                    {
-                        stop.PlatformCode = "";
                     }
 
                     string id = stop.StopId;
