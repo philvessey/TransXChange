@@ -205,6 +205,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -345,6 +347,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
@@ -751,6 +755,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -891,6 +897,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
@@ -1335,6 +1343,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -1505,6 +1515,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
@@ -1941,6 +1953,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -2111,6 +2125,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
@@ -2525,6 +2541,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -2665,6 +2683,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
@@ -3071,6 +3091,8 @@ namespace TransXChange.Common.Helpers
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
 
+                                        publicHolidays = publicHolidays.Distinct().ToList();
+
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
                                             DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
@@ -3211,6 +3233,8 @@ namespace TransXChange.Common.Helpers
                                         {
                                             publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate));
                                         }
+
+                                        publicHolidays = publicHolidays.Distinct().ToList();
 
                                         for (int i = 1; i <= publicHolidays.Count; i++)
                                         {
