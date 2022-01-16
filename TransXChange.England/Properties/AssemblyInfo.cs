@@ -2,4 +2,4 @@
 
 [assembly: AssemblyCopyright("Copyright © 2021 Phil Vessey and Contributors")]
 [assembly: AssemblyTitle("TransXChange.England")]
-[assembly: AssemblyVersion("1.1.9.0")]
+[assembly: AssemblyVersion("1.2.0.0")]
