@@ -28,10 +28,15 @@ stages:
         FilenamePattern: 'AssemblyInfo.*'
 
     - task: UseDotNet@2
-      displayName: 'Use net6.0'
+      displayName: 'Use Required SDKs'
       inputs:
         packageType: 'sdk'
         version: '6.0.x'
+
+    - task: CmdLine@2
+      displayName: 'List Installed SDKs'
+      inputs:
+        script: 'dotnet --list-sdks'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build All Projects'
