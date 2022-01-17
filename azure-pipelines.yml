@@ -6,7 +6,7 @@ trigger:
 variables:
   buildConfiguration: 'release'
   tagPrefix: 'v'
-  vmImageName: 'windows-latest'
+  vmImageName: 'windows-2022'
 
 stages:
 - stage: 'buildSolution'
@@ -26,6 +26,12 @@ stages:
         VersionNumber: '$(Build.BuildNumber)'
         InjectVersion: true
         FilenamePattern: 'AssemblyInfo.*'
+
+    - task: UseDotNet@2
+      displayName: 'Use net6.0'
+      inputs:
+        packageType: 'sdk'
+        version: '6.0.x'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build All Projects'
