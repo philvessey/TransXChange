@@ -1,4 +1,4 @@
-name: '1.1.9.$(Rev:r)'
+name: '1.2.0.$(Rev:r)'
 
 trigger:
 - master
@@ -6,7 +6,7 @@ trigger:
 variables:
   buildConfiguration: 'release'
   tagPrefix: 'v'
-  vmImageName: 'windows-latest'
+  vmImageName: 'windows-2022'
 
 stages:
 - stage: 'buildSolution'
@@ -26,6 +26,17 @@ stages:
         VersionNumber: '$(Build.BuildNumber)'
         InjectVersion: true
         FilenamePattern: 'AssemblyInfo.*'
+
+    - task: UseDotNet@2
+      displayName: 'Use Required SDKs'
+      inputs:
+        packageType: 'sdk'
+        version: '6.0.x'
+
+    - task: CmdLine@2
+      displayName: 'List Installed SDKs'
+      inputs:
+        script: 'dotnet --list-sdks'
 
     - task: DotNetCoreCLI@2
       displayName: 'Build All Projects'
