@@ -13,7 +13,28 @@ namespace TransXChange.Common.Helpers
         {
             Dictionary<string, NAPTANStop> dictionary = new Dictionary<string, NAPTANStop>();
 
-            if (path.EndsWith(".zip"))
+            if (path.EndsWith(".csv"))
+            {
+                if (File.Exists(path))
+                {
+                    string[] entries = Directory.GetFiles(Path.GetDirectoryName(path));
+
+                    foreach (string entry in entries)
+                    {
+                        if (entry.EndsWith("Stops.csv"))
+                        {
+                            using StreamReader reader = new StreamReader(entry);
+                            IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
+
+                            foreach (NAPTANStop stop in results)
+                            {
+                                dictionary.Add(stop.ATCOCode, stop);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (path.EndsWith(".zip"))
             {
                 if (File.Exists(path))
                 {

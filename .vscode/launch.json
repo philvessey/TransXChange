@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/TransXChange.England/bin/Debug/netcoreapp3.1/TransXChange.England.dll",
+            "program": "${workspaceFolder}/TransXChange.England/bin/Debug/net6.0/TransXChange.England.dll",
             "args": [],
             "cwd": "${workspaceFolder}/TransXChange.England",
             "console": "internalConsole",
