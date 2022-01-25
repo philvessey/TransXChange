@@ -10,7 +10,7 @@ TransXChange creates GTFS (General Transit Feed Specification) data sets for Gre
 dotnet run -n [--naptan] -t [--traveline] -o [--output] (--mode) (--filters) (--days)
 ```
 
-* [naptan] > Path to NaPTAN csv .zip or directory. Required.
+* [naptan] > Path to NaPTAN .csv .zip or directory. Required.
 * [traveline] > Path to regional Traveline TNDS .zip or directory. Required.
 * [output] > Path to output directory. Required.
 * (mode) > Specify transport mode for schedules. Default (all). Optional. Modes: all, bus, city-rail, ferry, light-rail
