@@ -2,21 +2,9 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Launch (console)",
+            "name": "net7.0 Attach",
             "type": "coreclr",
-            "request": "launch",
-            "preLaunchTask": "build",
-            "program": "${workspaceFolder}/TransXChange.England/bin/Debug/net6.0/TransXChange.England.dll",
-            "args": [],
-            "cwd": "${workspaceFolder}/TransXChange.England",
-            "console": "internalConsole",
-            "stopAtEntry": false
-        },
-        {
-            "name": ".NET Core Attach",
-            "type": "coreclr",
-            "request": "attach",
-            "processId": "${command:pickProcess}"
+            "request": "attach"
         }
     ]
 }
