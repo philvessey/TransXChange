@@ -7,7 +7,7 @@ TransXChange creates GTFS (General Transit Feed Specification) data sets for Gre
 ## Usage
 
 ```
-dotnet run -n [--naptan] -t [--traveline] -o [--output] -k [--key] (--mode) (--filters) (--days)
+dotnet run -n [--naptan] -t [--traveline] -o [--output] -k [--key]
 ```
 
 * [naptan] > Path to NaPTAN .csv .zip or directory. Required.
