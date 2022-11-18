@@ -10,6 +10,7 @@
                 "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
                 "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
                 "--output", "Required. Path to output directory.", 
+                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
                 "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
                 "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
                 "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
@@ -32,6 +33,7 @@
                 "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
                 "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
                 "--output", "Required. Path to output directory.", 
+                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
                 "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
                 "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
                 "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
@@ -54,6 +56,7 @@
                 "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
                 "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
                 "--output", "Required. Path to output directory.", 
+                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
                 "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
                 "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
                 "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
