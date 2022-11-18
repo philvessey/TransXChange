@@ -34,7 +34,7 @@ namespace TransXChange.Wales
                 Dictionary<string, NAPTANStop> stops = naptanHelpers.Read(options.Naptan);
                 Console.WriteLine(string.Format("READ: National Public Transport Access Nodes (NaPTAN). Found {0:#,##0.##} stops.", stops.Count));
 
-                Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadWales(stops, options.Traveline, options.Mode, options.Filters, options.Days);
+                Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadWales(stops, options.Traveline, options.Key, options.Mode, options.Filters, options.Days);
                 Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} original schedules.", originals.Count));
 
                 Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);

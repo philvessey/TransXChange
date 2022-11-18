@@ -14,6 +14,9 @@ namespace TransXChange.Common.Models
         [Option('o', "output", Required = true, HelpText = "Path to output directory.")]
         public string Output { get; set; }
 
+        [Option('k', "key", Required = true, HelpText = "Key for Nager.Date NuGet package.")]
+        public string Key { get; set; }
+
         [Option("mode", Default = "all", HelpText = "Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail")]
         public string Mode { get; set; }
 
