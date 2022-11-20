@@ -46,6 +46,33 @@ stages:
         arguments: '--configuration $(buildConfiguration)'
 
     - task: DotNetCoreCLI@2
+      displayName: 'Test England Project'
+      inputs:
+        command: 'test'
+        projects: '**/TransXChange.England.Test/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      env:
+        KEY: $(KEY)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Test Scotland Project'
+      inputs:
+        command: 'test'
+        projects: '**/TransXChange.Scotland.Test/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      env:
+        KEY: $(KEY)
+
+    - task: DotNetCoreCLI@2
+      displayName: 'Test Wales Project'
+      inputs:
+        command: 'test'
+        projects: '**/TransXChange.Wales.Test/*.csproj'
+        arguments: '--configuration $(buildConfiguration)'
+      env:
+        KEY: $(KEY)
+
+    - task: DotNetCoreCLI@2
       displayName: 'Publish England Project (linux-x64)'
       inputs:
         command: 'publish'

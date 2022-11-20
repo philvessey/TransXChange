@@ -38,7 +38,7 @@ namespace TransXChange.Scotland
                 Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} original schedules.", originals.Count));
 
                 Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
-                Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} duplicate schedules.", duplicates.Count));
+                Console.WriteLine(string.Format("SCAN: Traveline National Dataset (TNDS). Found {0:#,##0.##} duplicate schedules.", duplicates.Count));
 
                 Directory.CreateDirectory(options.Output);
                 Console.WriteLine(string.Format("WRITE: {0}", options.Output));

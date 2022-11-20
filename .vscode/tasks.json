@@ -2,71 +2,41 @@
     "version": "2.0.0",
     "tasks": [
         { 
-            "label": "net7.0 Run England", 
+            "label": "net7.0 England Test", 
             "type": "process", 
-            "args": 
-            [ 
-                "run", 
-                "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
-                "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
-                "--output", "Required. Path to output directory.", 
-                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
-                "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
-                "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
-                "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
-            ], 
+            "args": [ "test" ], 
             "isBackground": true, 
             "command": "dotnet", 
             "options": 
             { 
-                "cwd": "${workspaceFolder}/TransXChange.England", 
-                "env": { "VSTEST_HOST_DEBUG": "1" }
+                "cwd": "${workspaceFolder}/TransXChange.England.Test", 
+                "env": { "VSTEST_HOST_DEBUG": "1", "KEY": "Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information." }
             },
             "problemMatcher": [] 
-        },
+        }, 
         { 
-            "label": "net7.0 Run Scotland", 
+            "label": "net7.0 Scotland Test", 
             "type": "process", 
-            "args": 
-            [ 
-                "run", 
-                "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
-                "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
-                "--output", "Required. Path to output directory.", 
-                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
-                "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
-                "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
-                "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
-            ], 
+            "args": [ "test" ], 
             "isBackground": true, 
             "command": "dotnet", 
             "options": 
             { 
-                "cwd": "${workspaceFolder}/TransXChange.Scotland", 
-                "env": { "VSTEST_HOST_DEBUG": "1" }
+                "cwd": "${workspaceFolder}/TransXChange.Scotland.Test", 
+                "env": { "VSTEST_HOST_DEBUG": "1", "KEY": "Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information." }
             },
             "problemMatcher": [] 
-        },
+        }, 
         { 
-            "label": "net7.0 Run Wales", 
+            "label": "net7.0 Wales Test", 
             "type": "process", 
-            "args": 
-            [ 
-                "run", 
-                "--naptan", "Required. Path to NaPTAN csv .zip or directory.", 
-                "--traveline", "Required. Path to regional Traveline TNDS .zip or directory.", 
-                "--output", "Required. Path to output directory.", 
-                "--key", "Required. Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information.", 
-                "--mode", "(Default: all) Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail", 
-                "--filters", "(Default: all) Specify stop filters for schedules. Separate by comma.", 
-                "--days", "(Default: 7) Specify days in advance for schedules. Maximum is 28 days." 
-            ], 
+            "args": [ "test" ], 
             "isBackground": true, 
             "command": "dotnet", 
             "options": 
             { 
-                "cwd": "${workspaceFolder}/TransXChange.Wales", 
-                "env": { "VSTEST_HOST_DEBUG": "1" }
+                "cwd": "${workspaceFolder}/TransXChange.Wales.Test", 
+                "env": { "VSTEST_HOST_DEBUG": "1", "KEY": "Key for Nager.Date NuGet package. See https://github.com/sponsors/nager for information." }
             },
             "problemMatcher": [] 
         }
