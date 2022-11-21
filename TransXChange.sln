@@ -1,12 +1,18 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.Common", "TransXChange.Common\TransXChange.Common.csproj", "{8F5B4223-D649-47A1-8EEF-9231291875C2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.England", "TransXChange.England\TransXChange.England.csproj", "{3826F86F-6841-4BF2-9AB2-7C8B067FF884}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.England.Test", "TransXChange.England.Test\TransXChange.England.Test.csproj", "{730F4910-743B-42FF-8586-CD8A2EBE30A9}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.Scotland", "TransXChange.Scotland\TransXChange.Scotland.csproj", "{67DC9B3C-4E15-4C01-8F94-3CA9F23E2D64}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.Scotland.Test", "TransXChange.Scotland.Test\TransXChange.Scotland.Test.csproj", "{840A0539-AF6E-47AD-B54E-9C6010644E1B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.Wales", "TransXChange.Wales\TransXChange.Wales.csproj", "{725557E0-E97A-49BF-BC21-5BFD36D66C45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TransXChange.Wales.Test", "TransXChange.Wales.Test\TransXChange.Wales.Test.csproj", "{D12C6289-326C-48EF-A9F1-1EB10085F809}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1956887D-74AF-465D-BA1B-29B31E3A7AB6}"
 	ProjectSection(SolutionItems) = preProject
@@ -28,13 +34,25 @@ Global
 		{3826F86F-6841-4BF2-9AB2-7C8B067FF884}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3826F86F-6841-4BF2-9AB2-7C8B067FF884}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3826F86F-6841-4BF2-9AB2-7C8B067FF884}.Release|Any CPU.Build.0 = Release|Any CPU
+		{730F4910-743B-42FF-8586-CD8A2EBE30A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{730F4910-743B-42FF-8586-CD8A2EBE30A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{730F4910-743B-42FF-8586-CD8A2EBE30A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{730F4910-743B-42FF-8586-CD8A2EBE30A9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67DC9B3C-4E15-4C01-8F94-3CA9F23E2D64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{67DC9B3C-4E15-4C01-8F94-3CA9F23E2D64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{67DC9B3C-4E15-4C01-8F94-3CA9F23E2D64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67DC9B3C-4E15-4C01-8F94-3CA9F23E2D64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{840A0539-AF6E-47AD-B54E-9C6010644E1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{840A0539-AF6E-47AD-B54E-9C6010644E1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{840A0539-AF6E-47AD-B54E-9C6010644E1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{840A0539-AF6E-47AD-B54E-9C6010644E1B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{725557E0-E97A-49BF-BC21-5BFD36D66C45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{725557E0-E97A-49BF-BC21-5BFD36D66C45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{725557E0-E97A-49BF-BC21-5BFD36D66C45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{725557E0-E97A-49BF-BC21-5BFD36D66C45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D12C6289-326C-48EF-A9F1-1EB10085F809}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D12C6289-326C-48EF-A9F1-1EB10085F809}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D12C6289-326C-48EF-A9F1-1EB10085F809}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D12C6289-326C-48EF-A9F1-1EB10085F809}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
