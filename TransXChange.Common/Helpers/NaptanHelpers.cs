@@ -13,28 +13,7 @@ namespace TransXChange.Common.Helpers
         {
             Dictionary<string, NAPTANStop> dictionary = new Dictionary<string, NAPTANStop>();
 
-            if (path.EndsWith(".csv"))
-            {
-                if (File.Exists(path))
-                {
-                    string[] entries = Directory.GetFiles(Path.GetDirectoryName(path));
-
-                    foreach (string entry in entries)
-                    {
-                        if (entry.EndsWith("Stops.csv"))
-                        {
-                            using StreamReader reader = new StreamReader(entry);
-                            IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
-
-                            foreach (NAPTANStop stop in results)
-                            {
-                                dictionary.Add(stop.ATCOCode, stop);
-                            }
-                        }
-                    }
-                }
-            }
-            else if (path.EndsWith(".zip"))
+            if (path.EndsWith(".zip"))
             {
                 if (File.Exists(path))
                 {
@@ -42,7 +21,7 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.EndsWith("Stops.csv"))
+                        if (entry.Name.ToLower().Contains("stops") && entry.Name.ToLower().EndsWith(".csv"))
                         {
                             using StreamReader reader = new StreamReader(entry.Open());
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
@@ -55,6 +34,19 @@ namespace TransXChange.Common.Helpers
                     }
                 }
             }
+            else if (path.EndsWith(".csv"))
+            {
+                if (File.Exists(path))
+                {
+                    using StreamReader reader = new StreamReader(path);
+                    IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
+
+                    foreach (NAPTANStop stop in results)
+                    {
+                        dictionary.Add(stop.ATCOCode, stop);
+                    }
+                }
+            }
             else
             {
                 if (Directory.Exists(path))
@@ -63,7 +55,7 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.EndsWith("Stops.csv"))
+                        if (entry.ToLower().Contains("stops") && entry.ToLower().EndsWith(".csv"))
                         {
                             using StreamReader reader = new StreamReader(entry);
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
