@@ -446,6 +446,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
@@ -996,6 +1006,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
@@ -1614,6 +1634,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
@@ -2224,6 +2254,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
@@ -2782,6 +2822,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
@@ -3332,6 +3382,16 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                        {
+                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                        }
+
+                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                        {
+                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                        }
                                     }
                                     else
                                     {
