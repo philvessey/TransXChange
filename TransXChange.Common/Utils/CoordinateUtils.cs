@@ -4,11 +4,11 @@ namespace TransXChange.Common.Utils
 {
     public static class CoordinateUtils
     {
-        public static Coordinate GetFromEastingNorthing(int easting, int northing)
+        public static Coordinate GetFromEastingNorthing(double easting, double northing)
         {
             Coordinate coordinate = UniversalTransverseMercator.ConvertUTMtoLatLong(new UniversalTransverseMercator("30U", easting, northing));
             coordinate.FormatOptions.Format = CoordinateFormatType.Decimal;
-            coordinate.FormatOptions.Round = 7;
+            coordinate.FormatOptions.Round = 11;
 
             return coordinate;
         }
@@ -17,7 +17,7 @@ namespace TransXChange.Common.Utils
         {
             Coordinate coordinate = new Coordinate(latitude, longitude);
             coordinate.FormatOptions.Format = CoordinateFormatType.Decimal;
-            coordinate.FormatOptions.Round = 7;
+            coordinate.FormatOptions.Round = 11;
 
             return coordinate;
         }
