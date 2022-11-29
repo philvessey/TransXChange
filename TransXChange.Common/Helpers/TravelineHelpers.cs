@@ -446,6 +446,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
@@ -996,6 +998,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
@@ -1614,6 +1618,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
@@ -2224,6 +2230,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
@@ -2782,6 +2790,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
@@ -3332,6 +3342,8 @@ namespace TransXChange.Common.Helpers
                                     if (stops.ContainsKey(stop.ATCOCode))
                                     {
                                         stop.NaptanStop = stops[stop.ATCOCode];
+                                        stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Latitude.ToString();
+                                        stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(int.Parse(stops[stop.ATCOCode].Easting), int.Parse(stops[stop.ATCOCode].Northing)).Longitude.ToString();
                                     }
                                     else
                                     {
