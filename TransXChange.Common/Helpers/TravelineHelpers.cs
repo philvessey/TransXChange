@@ -33,6 +33,11 @@ namespace TransXChange.Common.Helpers
                             using StreamReader reader = new StreamReader(entry.Open());
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
+
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
                                 bool includeSchedule = false;
@@ -592,6 +597,11 @@ namespace TransXChange.Common.Helpers
                         {
                             using StreamReader reader = new StreamReader(entry);
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
 
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
@@ -1160,6 +1170,11 @@ namespace TransXChange.Common.Helpers
                         {
                             using StreamReader reader = new StreamReader(entry.Open());
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
 
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
@@ -1780,6 +1795,11 @@ namespace TransXChange.Common.Helpers
                         {
                             using StreamReader reader = new StreamReader(entry);
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
 
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
@@ -2409,6 +2429,11 @@ namespace TransXChange.Common.Helpers
                             using StreamReader reader = new StreamReader(entry.Open());
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
+
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
                                 bool includeSchedule = false;
@@ -2968,6 +2993,11 @@ namespace TransXChange.Common.Helpers
                         {
                             using StreamReader reader = new StreamReader(entry);
                             TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                            if (xml.VehicleJourneys == null)
+                            {
+                                continue;
+                            }
 
                             foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                             {
