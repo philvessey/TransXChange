@@ -198,12 +198,12 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
-                for (int i = 1; i <= schedule.Calendar.SupplementRunningDates.Count; i++)
+                for (int i = 0; i < schedule.Calendar.SupplementRunningDates.Count; i++)
                 {
                     GTFSCalendarDate calendarDate = new GTFSCalendarDate()
                     {
                         ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
-                        Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementRunningDates[i - 1].ToString("yyyy"), schedule.Calendar.SupplementRunningDates[i - 1].ToString("MM"), schedule.Calendar.SupplementRunningDates[i - 1].ToString("dd")),
+                        Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementRunningDates[i].ToString("yyyy"), schedule.Calendar.SupplementRunningDates[i].ToString("MM"), schedule.Calendar.SupplementRunningDates[i].ToString("dd")),
                         ExceptionType = "1"
                     };
 
@@ -215,12 +215,12 @@ namespace TransXChange.Common.Helpers
                     }
                 }
 
-                for (int i = 1; i <= schedule.Calendar.SupplementNonRunningDates.Count; i++)
+                for (int i = 0; i < schedule.Calendar.SupplementNonRunningDates.Count; i++)
                 {
                     GTFSCalendarDate calendarDate = new GTFSCalendarDate()
                     {
                         ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
-                        Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementNonRunningDates[i - 1].ToString("yyyy"), schedule.Calendar.SupplementNonRunningDates[i - 1].ToString("MM"), schedule.Calendar.SupplementNonRunningDates[i - 1].ToString("dd")),
+                        Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementNonRunningDates[i].ToString("yyyy"), schedule.Calendar.SupplementNonRunningDates[i].ToString("MM"), schedule.Calendar.SupplementNonRunningDates[i].ToString("dd")),
                         ExceptionType = "2"
                     };
 
@@ -264,24 +264,24 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in originals.Values)
             {
-                for (int i = 1; i <= schedule.Stops.Count; i++)
+                for (int i = 0; i < schedule.Stops.Count; i++)
                 {
                     GTFSStop stop = new GTFSStop()
                     {
-                        StopId = schedule.Stops[i - 1].NaptanStop.ATCOCode,
-                        StopCode = schedule.Stops[i - 1].NaptanStop.NaptanCode,
-                        StopName = schedule.Stops[i - 1].NaptanStop.CommonName,
-                        StopDesc = schedule.Stops[i - 1].NaptanStop.LocalityName,
-                        StopLat = schedule.Stops[i - 1].NaptanStop.Latitude,
-                        StopLon = schedule.Stops[i - 1].NaptanStop.Longitude,
+                        StopId = schedule.Stops[i].NaptanStop.ATCOCode,
+                        StopCode = schedule.Stops[i].NaptanStop.NaptanCode,
+                        StopName = schedule.Stops[i].NaptanStop.CommonName,
+                        StopDesc = schedule.Stops[i].NaptanStop.LocalityName,
+                        StopLat = schedule.Stops[i].NaptanStop.Latitude,
+                        StopLon = schedule.Stops[i].NaptanStop.Longitude,
                         StopTimezone = "Europe/London"
                     };
 
-                    if (schedule.Stops[i - 1].NaptanStop.StopType == "BST" || schedule.Stops[i - 1].NaptanStop.StopType == "FER" || schedule.Stops[i - 1].NaptanStop.StopType == "GAT" || schedule.Stops[i - 1].NaptanStop.StopType == "LCB" || schedule.Stops[i - 1].NaptanStop.StopType == "MET" || schedule.Stops[i - 1].NaptanStop.StopType == "RLY")
+                    if (schedule.Stops[i].NaptanStop.StopType == "BST" || schedule.Stops[i].NaptanStop.StopType == "FER" || schedule.Stops[i].NaptanStop.StopType == "GAT" || schedule.Stops[i].NaptanStop.StopType == "LCB" || schedule.Stops[i].NaptanStop.StopType == "MET" || schedule.Stops[i].NaptanStop.StopType == "RLY")
                     {
                         stop.LocationType = "1";
                     }
-                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "AIR" || schedule.Stops[i - 1].NaptanStop.StopType == "BCE" || schedule.Stops[i - 1].NaptanStop.StopType == "FTD" || schedule.Stops[i - 1].NaptanStop.StopType == "LSE" || schedule.Stops[i - 1].NaptanStop.StopType == "RSE" || schedule.Stops[i - 1].NaptanStop.StopType == "TMU")
+                    else if (schedule.Stops[i].NaptanStop.StopType == "AIR" || schedule.Stops[i].NaptanStop.StopType == "BCE" || schedule.Stops[i].NaptanStop.StopType == "FTD" || schedule.Stops[i].NaptanStop.StopType == "LSE" || schedule.Stops[i].NaptanStop.StopType == "RSE" || schedule.Stops[i].NaptanStop.StopType == "TMU")
                     {
                         stop.LocationType = "2";
                     }
@@ -290,7 +290,7 @@ namespace TransXChange.Common.Helpers
                         stop.LocationType = "0";
                     }
 
-                    if (schedule.Stops[i - 1].NaptanStop.StopType == "PLT" || schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
+                    if (schedule.Stops[i].NaptanStop.StopType == "PLT" || schedule.Stops[i].NaptanStop.StopType == "RPL")
                     {
                         stop.WheelchairBoarding = "1";
                     }
@@ -299,48 +299,48 @@ namespace TransXChange.Common.Helpers
                         stop.WheelchairBoarding = "0";
                     }
 
-                    if (schedule.Stops[i - 1].NaptanStop.StopType == "BCS" || schedule.Stops[i - 1].NaptanStop.StopType == "BCQ")
+                    if (schedule.Stops[i].NaptanStop.StopType == "BCS" || schedule.Stops[i].NaptanStop.StopType == "BCQ")
                     {
-                        if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("bay"))
+                        if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("bay"))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stance"))
+                        else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stance"))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stand"))
+                        else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stand"))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().StartsWith("stop"))
+                        else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stop"))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("/"))
+                        else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("/"))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("/").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("/").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("bay "))
+                        else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("bay "))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("bay ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("bay ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stance "))
+                        else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stance "))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stance ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stance ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stand "))
+                        else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stand "))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stand ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stand ").LastOrDefault().Trim();
                         }
-                        else if (schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Contains("stop "))
+                        else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stop "))
                         {
-                            stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.CommonName.ToLower().Split("stop ").LastOrDefault().Trim();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stop ").LastOrDefault().Trim();
                         }
                     }
-                    else if (schedule.Stops[i - 1].NaptanStop.StopType == "LPL" || schedule.Stops[i - 1].NaptanStop.StopType == "PLT" || schedule.Stops[i - 1].NaptanStop.StopType == "RPL")
+                    else if (schedule.Stops[i].NaptanStop.StopType == "LPL" || schedule.Stops[i].NaptanStop.StopType == "PLT" || schedule.Stops[i].NaptanStop.StopType == "RPL")
                     {
-                        stop.PlatformCode = schedule.Stops[i - 1].NaptanStop.ATCOCode.Substring(schedule.Stops[i - 1].NaptanStop.ATCOCode.Length - 1).ToLower();
+                        stop.PlatformCode = schedule.Stops[i].NaptanStop.ATCOCode.Substring(schedule.Stops[i].NaptanStop.ATCOCode.Length - 1).ToLower();
                     }
 
                     string id = stop.StopId;
@@ -361,31 +361,31 @@ namespace TransXChange.Common.Helpers
             {
                 TimeSpan timeSpan = new TimeSpan();
 
-                for (int i = 1; i <= schedule.Stops.Count; i++)
+                for (int i = 0; i < schedule.Stops.Count; i++)
                 {
                     GTFSStopTime stopTime = new GTFSStopTime()
                     {
                         TripId = schedule.Id,
-                        StopId = schedule.Stops[i - 1].NaptanStop.ATCOCode,
+                        StopId = schedule.Stops[i].NaptanStop.ATCOCode,
                         StopSequence = i.ToString()
                     };
 
-                    if (schedule.Stops[i - 1].DepartureTime < timeSpan)
+                    if (schedule.Stops[i].DepartureTime < timeSpan)
                     {
-                        schedule.Stops[i - 1].ArrivalTime = schedule.Stops[i - 1].ArrivalTime.Add(new TimeSpan(24, 0, 0));
-                        schedule.Stops[i - 1].DepartureTime = schedule.Stops[i - 1].DepartureTime.Add(new TimeSpan(24, 0, 0));
+                        schedule.Stops[i].ArrivalTime = schedule.Stops[i].ArrivalTime.Add(new TimeSpan(24, 0, 0));
+                        schedule.Stops[i].DepartureTime = schedule.Stops[i].DepartureTime.Add(new TimeSpan(24, 0, 0));
 
-                        stopTime.ArrivalTime = Math.Round(schedule.Stops[i - 1].ArrivalTime.TotalHours, 0).ToString() + schedule.Stops[i - 1].ArrivalTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
-                        stopTime.DepartureTime = Math.Round(schedule.Stops[i - 1].DepartureTime.TotalHours, 0).ToString() + schedule.Stops[i - 1].DepartureTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
+                        stopTime.ArrivalTime = Math.Round(schedule.Stops[i].ArrivalTime.TotalHours, 0).ToString() + schedule.Stops[i].ArrivalTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
+                        stopTime.DepartureTime = Math.Round(schedule.Stops[i].DepartureTime.TotalHours, 0).ToString() + schedule.Stops[i].DepartureTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
 
-                        timeSpan = schedule.Stops[i - 1].DepartureTime;
+                        timeSpan = schedule.Stops[i].DepartureTime;
                     }
                     else
                     {
-                        stopTime.ArrivalTime = schedule.Stops[i - 1].ArrivalTime.ToString(@"hh\:mm\:ss");
-                        stopTime.DepartureTime = schedule.Stops[i - 1].DepartureTime.ToString(@"hh\:mm\:ss");
+                        stopTime.ArrivalTime = schedule.Stops[i].ArrivalTime.ToString(@"hh\:mm\:ss");
+                        stopTime.DepartureTime = schedule.Stops[i].DepartureTime.ToString(@"hh\:mm\:ss");
 
-                        timeSpan = schedule.Stops[i - 1].DepartureTime;
+                        timeSpan = schedule.Stops[i].DepartureTime;
                     }
 
                     if (i == 1)

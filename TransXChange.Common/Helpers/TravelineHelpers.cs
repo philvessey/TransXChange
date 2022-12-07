@@ -212,9 +212,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -355,9 +355,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -425,25 +425,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -469,8 +469,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -777,9 +777,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -920,9 +920,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -990,25 +990,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -1034,8 +1034,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -1380,9 +1380,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -1553,9 +1553,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -1623,25 +1623,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -1667,8 +1667,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -2005,9 +2005,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -2178,9 +2178,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -2248,25 +2248,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -2292,8 +2292,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -2608,9 +2608,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -2751,9 +2751,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -2821,25 +2821,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -2865,8 +2865,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -3173,9 +3173,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -3316,9 +3316,9 @@ namespace TransXChange.Common.Helpers
 
                                         publicHolidays = publicHolidays.Distinct().ToList();
 
-                                        for (int i = 1; i <= publicHolidays.Count; i++)
+                                        for (int i = 0; i < publicHolidays.Count; i++)
                                         {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i - 1].Date, now, days);
+                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
 
                                             if (holidayDate != null)
                                             {
@@ -3386,25 +3386,25 @@ namespace TransXChange.Common.Helpers
                                 TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                 List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
-                                for (int i = 1; i <= patternTimings?.Count; i++)
+                                for (int i = 0; i < patternTimings?.Count; i++)
                                 {
                                     TXCStop stop = new TXCStop();
 
                                     if (i == 1)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else if (i == patternTimings.Count)
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].To.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
                                     else
                                     {
-                                        stop.ATCOCode = patternTimings[i - 1].From.StopPointRef;
+                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
                                         stop.ArrivalTime = arrivalTime.Value;
                                         stop.DepartureTime = departureTime.Value;
                                     }
@@ -3430,8 +3430,8 @@ namespace TransXChange.Common.Helpers
 
                                     schedule.Stops.Add(stop);
 
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
 
                                     if (mode != "all")
                                     {
@@ -3556,9 +3556,9 @@ namespace TransXChange.Common.Helpers
             {
                 if (!dictionary.ContainsKey(schedule.Id))
                 {
-                    for (int i = 1; i <= schedule.Calendar.RunningDates.Count; i++)
+                    for (int i = 0; i < schedule.Calendar.RunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.RunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in runningDateDuplicates)
                         {
@@ -3580,7 +3580,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.RunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
                         {
@@ -3602,7 +3602,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.RunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
@@ -3628,9 +3628,9 @@ namespace TransXChange.Common.Helpers
 
                 if (!dictionary.ContainsKey(schedule.Id))
                 {
-                    for (int i = 1; i <= schedule.Calendar.SupplementRunningDates.Count; i++)
+                    for (int i = 0; i < schedule.Calendar.SupplementRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in runningDateDuplicates)
                         {
@@ -3652,7 +3652,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
                         {
@@ -3674,7 +3674,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
@@ -3700,9 +3700,9 @@ namespace TransXChange.Common.Helpers
 
                 if (!dictionary.ContainsKey(schedule.Id))
                 {
-                    for (int i = 1; i <= schedule.Calendar.SupplementNonRunningDates.Count; i++)
+                    for (int i = 0; i < schedule.Calendar.SupplementNonRunningDates.Count; i++)
                     {
-                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> runningDateDuplicates = originals.Values.Where(s => s.Calendar.RunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in runningDateDuplicates)
                         {
@@ -3724,7 +3724,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementRunningDateDuplicates)
                         {
@@ -3746,7 +3746,7 @@ namespace TransXChange.Common.Helpers
                             }
                         }
 
-                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i - 1]) && s.Id != schedule.Id);
+                        IEnumerable<TXCSchedule> supplementNonRunningDateDuplicates = originals.Values.Where(s => s.Calendar.SupplementNonRunningDates.Contains(schedule.Calendar.SupplementNonRunningDates[i]) && s.Id != schedule.Id);
 
                         foreach (TXCSchedule duplicate in supplementNonRunningDateDuplicates)
                         {
