@@ -272,8 +272,8 @@ namespace TransXChange.Common.Helpers
                         StopCode = schedule.Stops[i].NaptanStop.NaptanCode,
                         StopName = schedule.Stops[i].NaptanStop.CommonName,
                         StopDesc = schedule.Stops[i].NaptanStop.LocalityName,
-                        StopLat = schedule.Stops[i].NaptanStop.Latitude,
                         StopLon = schedule.Stops[i].NaptanStop.Longitude,
+                        StopLat = schedule.Stops[i].NaptanStop.Latitude,
                         StopTimezone = "Europe/London"
                     };
 
