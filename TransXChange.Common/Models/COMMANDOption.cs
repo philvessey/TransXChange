@@ -20,6 +20,9 @@ namespace TransXChange.Common.Models
         [Option("mode", Default = "all", HelpText = "Specify transport mode for schedules. Modes: all, bus, city-rail, ferry, light-rail")]
         public string Mode { get; set; }
 
+        [Option("indexes", Default = new[] { "all" }, Separator = ',', HelpText = "Specify filename indexes for schedules. Separate by comma.")]
+        public IEnumerable<string> Indexes { get; set; }
+
         [Option("filters", Default = new[] { "all" }, Separator = ',', HelpText = "Specify stop filters for schedules. Separate by comma.")]
         public IEnumerable<string> Filters { get; set; }
 

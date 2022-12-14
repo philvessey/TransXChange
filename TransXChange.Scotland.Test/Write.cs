@@ -19,7 +19,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -36,7 +36,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -53,7 +53,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -70,7 +70,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -87,7 +87,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -104,7 +104,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
@@ -121,7 +121,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "6200206531" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, 7);
             Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));

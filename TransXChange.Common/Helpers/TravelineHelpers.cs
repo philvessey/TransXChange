@@ -14,7 +14,7 @@ namespace TransXChange.Common.Helpers
 {
     public class TravelineHelpers
     {
-        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -28,542 +28,1103 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry.Open());
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.Name.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry.Open());
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -572,11 +1133,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }
@@ -593,542 +1154,1103 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry);
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry);
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry);
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -1137,11 +2259,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }
@@ -1152,7 +2274,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -1166,602 +2288,1223 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry.Open());
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.Jan2ndScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.Jan2ndScotlandHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.AugustBankHolidayScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.StAndrewsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.StAndrewsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Jan2ndScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Jan2ndScotlandHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AugustBankHolidayScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.StAndrewsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.StAndrewsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Jan2ndScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AugustBankHolidayScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.StAndrewsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.StAndrewsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Jan2ndScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.AugustBankHolidayScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.StAndrewsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.StAndrewsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.Name.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry.Open());
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Jan2ndScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Jan2ndScotlandHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AugustBankHolidayScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.StAndrewsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.StAndrewsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Jan2ndScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AugustBankHolidayScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.StAndrewsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.StAndrewsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -1770,11 +3513,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }
@@ -1791,602 +3534,1223 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry);
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry);
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.Jan2ndScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.Jan2ndScotlandHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.AugustBankHolidayScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.StAndrewsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.StAndrewsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Jan2ndScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Jan2ndScotlandHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AugustBankHolidayScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.StAndrewsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.StAndrewsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Jan2ndScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AugustBankHolidayScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.StAndrewsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.StAndrewsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Jan2ndScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.AugustBankHolidayScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.StAndrewsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.StAndrewsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry);
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Jan2ndScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Jan2ndScotlandHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AugustBankHolidayScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.StAndrewsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.StAndrewsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Jan2ndScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Jan2ndScotlandHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetJan2ndScotlandHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AugustBankHolidayScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetAugustBankHolidayScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.StAndrewsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.StAndrewsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetStAndrewsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -2395,11 +4759,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }
@@ -2410,7 +4774,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -2424,542 +4788,1103 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry.Open());
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.Name.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry.Open());
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -2968,11 +5893,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }
@@ -2989,542 +5914,1103 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.EndsWith(".xml"))
+                        if (!indexes.Contains("all"))
                         {
-                            using StreamReader reader = new StreamReader(entry);
-                            TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
-
-                            if (xml.VehicleJourneys == null)
+                            foreach (string index in indexes)
                             {
-                                continue;
-                            }
-
-                            foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
-                            {
-                                bool includeSchedule = false;
-
-                                DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
-
-                                if (startDate == null || endDate == null)
+                                if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    continue;
-                                }
+                                    using StreamReader reader = new StreamReader(entry);
+                                    TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
-                                if (startDate > endDate || endDate < startDate)
-                                {
-                                    continue;
-                                }
-
-                                string journeyPatternReference = vehicleJourney.JourneyPatternRef;
-
-                                if (journeyPatternReference == null)
-                                {
-                                    continue;
-                                }
-
-                                TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                if (journeyPattern == null)
-                                {
-                                    journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                }
-
-                                TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                if (operatingProfile == null)
-                                {
-                                    operatingProfile = xml.Services.Service.OperatingProfile;
-                                }
-
-                                TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
-
-                                if (operatingProfile.BankHolidayOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
-
-                                    if (daysOfOperation != null)
+                                    if (xml.VehicleJourneys == null)
                                     {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+                                        continue;
+                                    }
 
-                                        if (daysOfOperation.AllBankHolidays != null)
+                                    foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                    {
+                                        bool includeSchedule = false;
+
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                        if (startDate == null || endDate == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                        if (startDate > endDate || endDate < startDate)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.Christmas != null)
+                                        string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                        if (journeyPatternReference == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            continue;
                                         }
 
-                                        if (daysOfOperation.DisplacementHolidays != null)
+                                        TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                        if (journeyPattern == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
                                         }
 
-                                        if (daysOfOperation.EarlyRunOff != null)
+                                        TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                        if (operatingProfile == null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            operatingProfile = xml.Services.Service.OperatingProfile;
                                         }
 
-                                        if (daysOfOperation.HolidayMondays != null)
+                                        TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                        if (operatingProfile.BankHolidayOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
 
-                                        if (daysOfOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfOperation.AllBankHolidays != null)
                                                 {
-                                                    calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                                if (daysOfNonOperation.AllBankHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Christmas != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.DisplacementHolidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EarlyRunOff != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.HolidayMondays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.Holidays != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.GoodFriday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.EasterMonday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.MayDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.SpringBank != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDay != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.BoxingDayHoliday != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                if (daysOfNonOperation.NewYearsEve != null)
+                                                {
+                                                    publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                                }
+
+                                                publicHolidays = publicHolidays.Distinct().ToList();
+
+                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                {
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                    if (holidayDate != null)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                        }
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
-
-                                        if (daysOfNonOperation.AllBankHolidays != null)
+                                        if (operatingProfile.SpecialDaysOperation != null)
                                         {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
+                                            TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                            TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
 
-                                        if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Christmas != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.DisplacementHolidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EarlyRunOff != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.HolidayMondays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.Holidays != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.GoodFriday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.EasterMonday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.MayDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.SpringBank != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.ChristmasDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDay != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.BoxingDayHoliday != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        if (daysOfNonOperation.NewYearsEve != null)
-                                        {
-                                            publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
-                                        }
-
-                                        publicHolidays = publicHolidays.Distinct().ToList();
-
-                                        for (int i = 0; i < publicHolidays.Count; i++)
-                                        {
-                                            DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
-
-                                            if (holidayDate != null)
+                                            if (daysOfOperation != null)
                                             {
-                                                if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (!calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
+                                                }
+                                            }
+
+                                            if (daysOfNonOperation != null)
+                                            {
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                                if (startDate != null && endDate != null)
+                                                {
+                                                    while (startDate.Value <= endDate.Value)
+                                                    {
+                                                        if (calendar.RunningDates.Contains(startDate.Value))
+                                                        {
+                                                            calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                        }
+
+                                                        startDate = startDate.Value.AddDays(1);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
-                                }
 
-                                if (operatingProfile.SpecialDaysOperation != null)
-                                {
-                                    TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
-                                    TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
 
-                                    if (daysOfOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                        TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
 
-                                        if (startDate != null && endDate != null)
+                                        TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                        List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                        for (int i = 0; i < patternTimings?.Count; i++)
                                         {
-                                            while (startDate.Value <= endDate.Value)
+                                            TXCStop stop = new TXCStop();
+
+                                            if (i == 1)
                                             {
-                                                if (!calendar.RunningDates.Contains(startDate.Value))
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else if (i == patternTimings.Count)
+                                            {
+                                                stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+                                            else
+                                            {
+                                                stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+                                            }
+
+                                            if (stops.ContainsKey(stop.ATCOCode))
+                                            {
+                                                stop.NaptanStop = stops[stop.ATCOCode];
+
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
                                                 {
-                                                    calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
                                                 }
 
-                                                startDate = startDate.Value.AddDays(1);
-                                            }
-                                        }
-                                    }
-
-                                    if (daysOfNonOperation != null)
-                                    {
-                                        startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                        endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
-
-                                        if (startDate != null && endDate != null)
-                                        {
-                                            while (startDate.Value <= endDate.Value)
-                                            {
-                                                if (calendar.RunningDates.Contains(startDate.Value))
+                                                if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
                                                 {
-                                                    calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
                                                 }
-
-                                                startDate = startDate.Value.AddDays(1);
                                             }
-                                        }
-                                    }
-                                }
-
-                                calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
-
-                                TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
-                                TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
-
-                                TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
-                                List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
-
-                                for (int i = 0; i < patternTimings?.Count; i++)
-                                {
-                                    TXCStop stop = new TXCStop();
-
-                                    if (i == 1)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else if (i == patternTimings.Count)
-                                    {
-                                        stop.ATCOCode = patternTimings[i].To.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-                                    else
-                                    {
-                                        stop.ATCOCode = patternTimings[i].From.StopPointRef;
-                                        stop.ArrivalTime = arrivalTime.Value;
-                                        stop.DepartureTime = departureTime.Value;
-                                    }
-
-                                    if (stops.ContainsKey(stop.ATCOCode))
-                                    {
-                                        stop.NaptanStop = stops[stop.ATCOCode];
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
-                                        {
-                                            stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
-                                        }
-
-                                        if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
-                                        {
-                                            stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
-                                        }
-                                    }
-                                    else
-                                    {
-                                        stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
-                                    }
-
-                                    schedule.Stops.Add(stop);
-
-                                    arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                    if (mode != "all")
-                                    {
-                                        if (mode == "bus")
-                                        {
-                                            if (stop.NaptanStop.StopType == "BCT")
+                                            else
                                             {
-                                                foreach (string filter in filters)
+                                                stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                            }
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (mode != "all")
+                                            {
+                                                if (mode == "bus")
                                                 {
-                                                    if (filter != "all")
+                                                    if (stop.NaptanStop.StopType == "BCT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "city-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "RLY")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "ferry")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "FBT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                                else if (mode == "light-rail")
+                                                {
+                                                    if (stop.NaptanStop.StopType == "PLT")
+                                                    {
+                                                        if (!filters.Contains("all"))
+                                                        {
+                                                            foreach (string filter in filters)
+                                                            {
+                                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                                {
+                                                                    includeSchedule = true;
+                                                                }
+                                                            }
+                                                        }
+                                                        else
+                                                        {
+                                                            includeSchedule = true;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            {
+                                                if (!filters.Contains("all"))
+                                                {
+                                                    foreach (string filter in filters)
                                                     {
                                                         if (stop.NaptanStop.ATCOCode.Contains(filter))
                                                         {
                                                             includeSchedule = true;
                                                         }
                                                     }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
                                                 }
-                                            }
-                                        }
-                                        else if (mode == "city-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "RLY")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "ferry")
-                                        {
-                                            if (stop.NaptanStop.StopType == "FBT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        else if (mode == "light-rail")
-                                        {
-                                            if (stop.NaptanStop.StopType == "PLT")
-                                            {
-                                                foreach (string filter in filters)
-                                                {
-                                                    if (filter != "all")
-                                                    {
-                                                        if (stop.NaptanStop.ATCOCode.Contains(filter))
-                                                        {
-                                                            includeSchedule = true;
-                                                        }
-                                                    }
-                                                    else
-                                                    {
-                                                        includeSchedule = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        foreach (string filter in filters)
-                                        {
-                                            if (filter != "all")
-                                            {
-                                                if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                else
                                                 {
                                                     includeSchedule = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (includeSchedule)
+                                        {
+                                            dictionary.Add(schedule.Id, schedule);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (entry.EndsWith(".xml"))
+                            {
+                                using StreamReader reader = new StreamReader(entry);
+                                TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
+
+                                if (xml.VehicleJourneys == null)
+                                {
+                                    continue;
+                                }
+
+                                foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
+                                {
+                                    bool includeSchedule = false;
+
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+
+                                    if (startDate == null || endDate == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    if (startDate > endDate || endDate < startDate)
+                                    {
+                                        continue;
+                                    }
+
+                                    string journeyPatternReference = vehicleJourney.JourneyPatternRef;
+
+                                    if (journeyPatternReference == null)
+                                    {
+                                        continue;
+                                    }
+
+                                    TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
+
+                                    if (journeyPattern == null)
+                                    {
+                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
+                                    }
+
+                                    TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
+
+                                    if (operatingProfile == null)
+                                    {
+                                        operatingProfile = xml.Services.Service.OperatingProfile;
+                                    }
+
+                                    TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
+
+                                    if (operatingProfile.BankHolidayOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.BankHolidayOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.BankHolidayOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            List<PublicHoliday> publicHolidays = new List<PublicHoliday>();
+
+                                            if (daysOfNonOperation.AllBankHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.AllHolidaysExceptChristmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Christmas != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.DisplacementHolidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EarlyRunOff != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.HolidayMondays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.Holidays != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.GoodFriday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetGoodFriday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.EasterMonday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetEasterMonday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.MayDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetMayDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.SpringBank != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetSpringBank(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.LateSummerBankHolidayNotScotland != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetLateSummerBankHolidayNotScotland(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.ChristmasDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetChristmasDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDay != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDay(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.BoxingDayHoliday != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetBoxingDayHoliday(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            if (daysOfNonOperation.NewYearsEve != null)
+                                            {
+                                                publicHolidays.AddRange(BankHolidayUtils.GetNewYearsEve(calendar.StartDate, calendar.EndDate, key));
+                                            }
+
+                                            publicHolidays = publicHolidays.Distinct().ToList();
+
+                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            {
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+
+                                                if (holidayDate != null)
+                                                {
+                                                    if (calendar.RunningDates.Contains(holidayDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(holidayDate.Value);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    if (operatingProfile.SpecialDaysOperation != null)
+                                    {
+                                        TXCXmlDaysOfOperation daysOfOperation = operatingProfile.SpecialDaysOperation.DaysOfOperation;
+                                        TXCXmlDaysOfNonOperation daysOfNonOperation = operatingProfile.SpecialDaysOperation.DaysOfNonOperation;
+
+                                        if (daysOfOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (!calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+
+                                        if (daysOfNonOperation != null)
+                                        {
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+
+                                            if (startDate != null && endDate != null)
+                                            {
+                                                while (startDate.Value <= endDate.Value)
+                                                {
+                                                    if (calendar.RunningDates.Contains(startDate.Value))
+                                                    {
+                                                        calendar.SupplementNonRunningDates.Add(startDate.Value);
+                                                    }
+
+                                                    startDate = startDate.Value.AddDays(1);
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+
+                                    TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpan();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpan();
+
+                                    TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
+                                    List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
+
+                                    for (int i = 0; i < patternTimings?.Count; i++)
+                                    {
+                                        TXCStop stop = new TXCStop();
+
+                                        if (i == 1)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else if (i == patternTimings.Count)
+                                        {
+                                            stop.ATCOCode = patternTimings[i].To.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+                                        else
+                                        {
+                                            stop.ATCOCode = patternTimings[i].From.StopPointRef;
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+                                        }
+
+                                        if (stops.ContainsKey(stop.ATCOCode))
+                                        {
+                                            stop.NaptanStop = stops[stop.ATCOCode];
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Longitude))
+                                            {
+                                                stop.NaptanStop.Longitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Longitude.ToString();
+                                            }
+
+                                            if (string.IsNullOrEmpty(stop.NaptanStop.Latitude))
+                                            {
+                                                stop.NaptanStop.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(stop.NaptanStop.Easting), double.Parse(stop.NaptanStop.Northing)).Latitude.ToString();
+                                            }
+                                        }
+                                        else
+                                        {
+                                            stop.NaptanStop = new NAPTANStop() { ATCOCode = stop.ATCOCode, CommonName = "Unknown NaPTAN Stop", StopType = "ZZZ" };
+                                        }
+
+                                        schedule.Stops.Add(stop);
+
+                                        arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                        if (mode != "all")
+                                        {
+                                            if (mode == "bus")
+                                            {
+                                                if (stop.NaptanStop.StopType == "BCT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "city-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "RLY")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "ferry")
+                                            {
+                                                if (stop.NaptanStop.StopType == "FBT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                            else if (mode == "light-rail")
+                                            {
+                                                if (stop.NaptanStop.StopType == "PLT")
+                                                {
+                                                    if (!filters.Contains("all"))
+                                                    {
+                                                        foreach (string filter in filters)
+                                                        {
+                                                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                            {
+                                                                includeSchedule = true;
+                                                            }
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!filters.Contains("all"))
+                                            {
+                                                foreach (string filter in filters)
+                                                {
+                                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                                    {
+                                                        includeSchedule = true;
+                                                    }
                                                 }
                                             }
                                             else
@@ -3533,11 +7019,11 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
                                     }
-                                }
 
-                                if (includeSchedule)
-                                {
-                                    dictionary.Add(schedule.Id, schedule);
+                                    if (includeSchedule)
+                                    {
+                                        dictionary.Add(schedule.Id, schedule);
+                                    }
                                 }
                             }
                         }

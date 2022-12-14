@@ -29,7 +29,7 @@ namespace TransXChange.England.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "1800EB01341" }, 7);
+            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, 7);
 
             Assert.IsNotNull(originals);
         }
