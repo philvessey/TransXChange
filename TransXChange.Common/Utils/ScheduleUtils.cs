@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using TransXChange.Common.Models;
 
 namespace TransXChange.Common.Utils
@@ -87,6 +88,28 @@ namespace TransXChange.Common.Utils
             }
 
             return result;
+        }
+
+        public static bool GetDuplicate(bool includeSchedule, IEnumerable<TXCSchedule> duplicates, TXCSchedule schedule)
+        {
+            if (includeSchedule)
+            {
+                foreach (TXCSchedule duplicate in duplicates)
+                {
+                    if (schedule.Stops.FirstOrDefault().ATCOCode == duplicate.Stops.FirstOrDefault().ATCOCode && schedule.Stops.FirstOrDefault().DepartureTime == duplicate.Stops.FirstOrDefault().DepartureTime)
+                    {
+                        if (schedule.Stops.LastOrDefault().ATCOCode == duplicate.Stops.LastOrDefault().ATCOCode && schedule.Stops.LastOrDefault().ArrivalTime == duplicate.Stops.LastOrDefault().ArrivalTime)
+                        {
+                            if (schedule.Line == duplicate.Line)
+                            {
+                                includeSchedule = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return includeSchedule;
         }
     }
 }
