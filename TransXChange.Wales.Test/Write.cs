@@ -19,11 +19,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteAgency(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteAgency(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "agency.txt")));
         }
@@ -36,11 +35,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteCalendar(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteCalendar(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "calendar.txt")));
         }
@@ -53,11 +51,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteCalendarDates(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteCalendarDates(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "calendar_dates.txt")));
         }
@@ -70,11 +67,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteRoutes(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteRoutes(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "routes.txt")));
         }
@@ -87,11 +83,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteStops(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteStops(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "stops.txt")));
         }
@@ -104,11 +99,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteStopTimes(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteStopTimes(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "stop_times.txt")));
         }
@@ -121,11 +115,10 @@ namespace TransXChange.Wales.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/cardiff.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
-            Dictionary<string, TXCSchedule> duplicates = travelineHelpers.ScanDuplicate(originals);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, "Data/W.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "5710WDB48395" }, 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteTrips(originals, duplicates, localDirectory.FullName);
+            gtfsHelpers.WriteTrips(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "trips.txt")));
         }

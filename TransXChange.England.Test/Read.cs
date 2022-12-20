@@ -18,7 +18,7 @@ namespace TransXChange.England.Test
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
 
-            Assert.IsNotNull(stops);
+            Assert.IsTrue(stops.Count > 0);
         }
 
         [TestMethod]
@@ -29,9 +29,9 @@ namespace TransXChange.England.Test
             TravelineHelpers travelineHelpers = new TravelineHelpers();
             
             Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
-            Dictionary<string, TXCSchedule> originals = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, 7);
+            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, 7);
 
-            Assert.IsNotNull(originals);
+            Assert.IsTrue(schedules.Count > 0);
         }
     }
 }
