@@ -31,7 +31,7 @@ namespace TransXChange.Common.Utils
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode == filter)
+                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -48,7 +48,7 @@ namespace TransXChange.Common.Utils
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode == filter)
+                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -68,7 +68,7 @@ namespace TransXChange.Common.Utils
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode == filter)
+                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -88,7 +88,7 @@ namespace TransXChange.Common.Utils
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode == filter)
+                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -108,7 +108,7 @@ namespace TransXChange.Common.Utils
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode == filter)
+                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -127,7 +127,7 @@ namespace TransXChange.Common.Utils
                     {
                         foreach (string filter in filters)
                         {
-                            if (stop.NaptanStop.ATCOCode == filter)
+                            if (stop.NaptanStop.ATCOCode.Contains(filter))
                             {
                                 includeSchedule = true;
                             }
