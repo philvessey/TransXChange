@@ -1,9 +1,30 @@
 ﻿using System;
+using System.Globalization;
 
 namespace TransXChange.Common.Utils
 {
     public static class DateTimeUtils
     {
+        public static DateTime GetScheduleDate(DateTime result, string date)
+        {
+            if (DateTime.TryParse(date, CultureInfo.CreateSpecificCulture("en-GB"), out DateTime now))
+            {
+                result = now;
+            }
+
+            if (date == "yesterday")
+            {
+                result = result.AddDays(-1);
+            }
+
+            if (date == "tomorrow")
+            {
+                result = result.AddDays(1);
+            }
+
+            return result;
+        }
+        
         public static DateTime? GetStartDate(DateTime? result, DateTime now, int days)
         {
             days = Validate(days);

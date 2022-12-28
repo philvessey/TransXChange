@@ -26,6 +26,9 @@ namespace TransXChange.Common.Models
         [Option("filters", Default = new[] { "all" }, Separator = ',', HelpText = "Specify stop filters for schedules. Separate by comma.")]
         public IEnumerable<string> Filters { get; set; }
 
+        [Option("date", Default = "today", HelpText = "Specify date for schedules. Dates: yesterday, today, tomorrow, dd/MM/yyyy")]
+        public string Date { get; set; }
+
         [Option("days", Default = 7, HelpText = "Specify days in advance for schedules. Maximum is 28 days.")]
         public int Days { get; set; }
     }
