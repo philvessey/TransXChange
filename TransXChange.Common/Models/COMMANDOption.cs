@@ -27,6 +27,6 @@ namespace TransXChange.Common.Models
         public IEnumerable<string> Filters { get; set; }
 
         [Option("days", Default = 7, HelpText = "Specify days in advance for schedules. Maximum is 28 days.")]
-        public double Days { get; set; }
+        public int Days { get; set; }
     }
 }

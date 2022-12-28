@@ -14,7 +14,7 @@ namespace TransXChange.Common.Helpers
 {
     public class TravelineHelpers
     {
-        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -898,7 +898,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
@@ -1782,7 +1782,7 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 

@@ -4,7 +4,7 @@ namespace TransXChange.Common.Utils
 {
     public static class DateTimeUtils
     {
-        public static DateTime? GetStartDate(DateTime? result, DateTime now, double days)
+        public static DateTime? GetStartDate(DateTime? result, DateTime now, int days)
         {
             days = Validate(days);
 
@@ -29,7 +29,7 @@ namespace TransXChange.Common.Utils
             return result;
         }
 
-        public static DateTime? GetEndDate(DateTime? result, DateTime now, double days)
+        public static DateTime? GetEndDate(DateTime? result, DateTime now, int days)
         {
             days = Validate(days);
 
@@ -54,7 +54,7 @@ namespace TransXChange.Common.Utils
             return result;
         }
 
-        public static DateTime? GetHolidayDate(DateTime? result, DateTime now, double days)
+        public static DateTime? GetHolidayDate(DateTime? result, DateTime now, int days)
         {
             days = Validate(days);
 
@@ -79,7 +79,7 @@ namespace TransXChange.Common.Utils
             return result;
         }
 
-        private static double Validate(double days)
+        private static int Validate(int days)
         {
             if (days < 1)
             {
