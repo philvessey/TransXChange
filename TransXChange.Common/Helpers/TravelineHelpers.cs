@@ -14,13 +14,13 @@ namespace TransXChange.Common.Helpers
 {
     public class TravelineHelpers
     {
-        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
             if (path.EndsWith(".zip"))
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (File.Exists(path))
                 {
@@ -46,8 +46,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -93,7 +93,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -111,7 +111,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -131,8 +131,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -150,8 +150,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -258,8 +258,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -305,7 +305,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -323,7 +323,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -343,8 +343,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -362,8 +362,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -458,7 +458,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (Directory.Exists(path))
                 {
@@ -484,8 +484,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -531,7 +531,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -549,7 +549,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -569,8 +569,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -588,8 +588,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -696,8 +696,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -743,7 +743,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -761,7 +761,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -781,8 +781,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -800,8 +800,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -898,13 +898,13 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
             if (path.EndsWith(".zip"))
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (File.Exists(path))
                 {
@@ -930,8 +930,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -977,7 +977,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -995,7 +995,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1015,8 +1015,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1034,8 +1034,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1142,8 +1142,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -1189,7 +1189,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1207,7 +1207,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1227,8 +1227,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1246,8 +1246,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1342,7 +1342,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (Directory.Exists(path))
                 {
@@ -1368,8 +1368,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -1415,7 +1415,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1433,7 +1433,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1453,8 +1453,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1472,8 +1472,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1580,8 +1580,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -1627,7 +1627,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1645,7 +1645,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1665,8 +1665,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1684,8 +1684,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1782,13 +1782,13 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, double days)
+        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
             Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
 
             if (path.EndsWith(".zip"))
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (File.Exists(path))
                 {
@@ -1814,8 +1814,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -1861,7 +1861,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1879,7 +1879,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1899,8 +1899,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1918,8 +1918,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -2026,8 +2026,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -2073,7 +2073,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2091,7 +2091,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2111,8 +2111,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2130,8 +2130,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2226,7 +2226,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime now = DateTime.Now.Date;
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
 
                 if (Directory.Exists(path))
                 {
@@ -2252,8 +2252,8 @@ namespace TransXChange.Common.Helpers
                                     {
                                         bool includeSchedule = false;
 
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -2299,7 +2299,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -2317,7 +2317,7 @@ namespace TransXChange.Common.Helpers
 
                                                 for (int i = 0; i < publicHolidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -2337,8 +2337,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -2356,8 +2356,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -2464,8 +2464,8 @@ namespace TransXChange.Common.Helpers
                                 {
                                     bool includeSchedule = false;
 
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), now, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), now, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTime(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTime(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -2511,7 +2511,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2529,7 +2529,7 @@ namespace TransXChange.Common.Helpers
 
                                             for (int i = 0; i < publicHolidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, now, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2549,8 +2549,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2568,8 +2568,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), now, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), now, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTime(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTime(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {

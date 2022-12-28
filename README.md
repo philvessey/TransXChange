@@ -17,6 +17,7 @@ dotnet run -n [--naptan] -t [--traveline] -o [--output] -k [--key]
 * (mode) > Specify transport mode for schedules. Default (all). Optional. Modes: all, bus, city-rail, ferry, light-rail
 * (indexes) > Specify filename indexes for schedules. Default (all). Optional. Separate by comma.
 * (filters) > Specify stop filters for schedules. Default (all). Optional. Separate by comma.
+* (date) > Specify date for schedules. Default (today). Optional. Dates: yesterday, today, tomorrow, dd/MM/yyyy
 * (days) > Specify days in advance for schedules. Default (7). Optional. Maximum is 28 days.
 
 ## License
