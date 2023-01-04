@@ -8,13 +8,11 @@ namespace TransXChange.Common.Utils
     {
         public static TXCStop Build(Dictionary<string, NAPTANStop> stops, string reference)
         {
-            TXCStop result = new TXCStop()
+            return new TXCStop()
             {
                 ATCOCode = reference,
                 NaptanStop = GetNaptan(stops, reference)
             };
-
-            return result;
         }
 
         public static bool GetFilter(bool includeSchedule, string mode, IEnumerable<string> filters, TXCStop stop)
