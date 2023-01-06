@@ -20,7 +20,7 @@ namespace TransXChange.Common.Helpers
 
             if (path.EndsWith(".zip"))
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (File.Exists(path))
                 {
@@ -458,7 +458,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (Directory.Exists(path))
                 {
@@ -904,7 +904,7 @@ namespace TransXChange.Common.Helpers
 
             if (path.EndsWith(".zip"))
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (File.Exists(path))
                 {
@@ -1342,7 +1342,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (Directory.Exists(path))
                 {
@@ -1788,7 +1788,7 @@ namespace TransXChange.Common.Helpers
 
             if (path.EndsWith(".zip"))
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (File.Exists(path))
                 {
@@ -2226,7 +2226,7 @@ namespace TransXChange.Common.Helpers
             }
             else
             {
-                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.Date, date);
+                DateTime scheduleDate = DateTimeUtils.GetScheduleDate(DateTime.Now.ToZonedDateTime("Europe/London").Date, date);
 
                 if (Directory.Exists(path))
                 {
