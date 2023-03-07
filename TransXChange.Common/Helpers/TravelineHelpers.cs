@@ -211,6 +211,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -408,6 +422,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
@@ -649,6 +677,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -846,6 +888,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
@@ -1095,6 +1151,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1292,6 +1362,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
@@ -1533,6 +1617,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1730,6 +1828,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
@@ -1979,6 +2091,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2176,6 +2302,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
@@ -2417,6 +2557,20 @@ namespace TransXChange.Common.Helpers
 
                                             if (i == patternTimings.Count - 1)
                                             {
+                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.ArrivalTime = arrivalTime.Value;
+                                                stop.DepartureTime = departureTime.Value;
+
+                                                schedule.Stops.Add(stop);
+
+                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                            }
+
+                                            if (i == patternTimings.Count - 1)
+                                            {
                                                 TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2614,6 +2768,20 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         if (i > 0 && i < patternTimings.Count - 1)
+                                        {
+                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.ArrivalTime = arrivalTime.Value;
+                                            stop.DepartureTime = departureTime.Value;
+
+                                            schedule.Stops.Add(stop);
+
+                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
+                                        }
+
+                                        if (i == patternTimings.Count - 1)
                                         {
                                             TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
                                             stop.ArrivalTime = arrivalTime.Value;
