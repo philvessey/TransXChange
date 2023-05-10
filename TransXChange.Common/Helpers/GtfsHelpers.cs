@@ -366,8 +366,7 @@ namespace TransXChange.Common.Helpers
                     GTFSStopTime stopTime = new GTFSStopTime()
                     {
                         TripId = schedule.Id,
-                        StopId = schedule.Stops[i].NaptanStop.ATCOCode,
-                        StopSequence = i.ToString()
+                        StopId = schedule.Stops[i].NaptanStop.ATCOCode
                     };
 
                     if (schedule.Stops[i].DepartureTime < timeSpan)
@@ -388,23 +387,34 @@ namespace TransXChange.Common.Helpers
                         timeSpan = schedule.Stops[i].DepartureTime;
                     }
 
+                    int stopSequence = -1;
+                    int pickupType = -1;
+                    int dropOffType = -1;
+
                     if (i == 0)
                     {
-                        stopTime.PickupType = "0";
-                        stopTime.DropOffType = "1";
+                        stopSequence = 1;
+                        pickupType = 0;
+                        dropOffType = 1;
                     }
 
                     if (i > 0 && i < schedule.Stops.Count - 1)
                     {
-                        stopTime.PickupType = "0";
-                        stopTime.DropOffType = "0";
+                        stopSequence = i + 1;
+                        pickupType = 0;
+                        dropOffType = 0;
                     }
 
                     if (i == schedule.Stops.Count - 1)
                     {
-                        stopTime.PickupType = "1";
-                        stopTime.DropOffType = "0";
+                        stopSequence = schedule.Stops.Count;
+                        pickupType = 1;
+                        dropOffType = 0;
                     }
+
+                    stopTime.StopSequence = stopSequence.ToString();
+                    stopTime.PickupType = pickupType.ToString();
+                    stopTime.DropOffType = dropOffType.ToString();
 
                     string id = Guid.NewGuid().ToString();
 
