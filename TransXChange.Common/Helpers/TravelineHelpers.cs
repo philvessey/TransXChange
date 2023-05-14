@@ -189,8 +189,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -203,8 +211,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -217,8 +233,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -231,8 +255,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -415,8 +447,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -429,8 +469,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -443,8 +491,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -457,8 +513,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -655,8 +719,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -669,8 +741,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -683,8 +763,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -697,8 +785,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -881,8 +977,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -895,8 +999,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -909,8 +1021,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -923,8 +1043,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1129,8 +1257,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1143,8 +1279,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1157,8 +1301,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1171,8 +1323,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1355,8 +1515,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1369,8 +1537,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1383,8 +1559,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1397,8 +1581,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1595,8 +1787,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1609,8 +1809,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1623,8 +1831,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1637,8 +1853,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -1821,8 +2045,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1835,8 +2067,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1849,8 +2089,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -1863,8 +2111,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2069,8 +2325,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2083,8 +2347,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2097,8 +2369,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2111,8 +2391,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2295,8 +2583,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2309,8 +2605,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2323,8 +2627,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2337,8 +2649,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2535,8 +2855,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2549,8 +2877,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2563,8 +2899,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2577,8 +2921,16 @@ namespace TransXChange.Common.Helpers
 
                                                 schedule.Stops.Add(stop);
 
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                                }
 
                                                 includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
@@ -2761,8 +3113,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2775,8 +3135,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2789,8 +3157,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
@@ -2803,8 +3179,16 @@ namespace TransXChange.Common.Helpers
 
                                             schedule.Stops.Add(stop);
 
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                            }
+                                            else
+                                            {
+                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
+                                            }
 
                                             includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
