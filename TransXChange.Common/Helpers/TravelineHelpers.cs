@@ -181,93 +181,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -439,93 +463,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -711,93 +759,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -969,93 +1041,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -1249,93 +1345,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -1507,93 +1627,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -1779,93 +1923,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -2037,93 +2205,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -2317,93 +2509,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -2575,93 +2791,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -2847,93 +3087,117 @@ namespace TransXChange.Common.Helpers
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TXCStop stop = new TXCStop();
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUp";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                                departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "pickUpAndSetDown";
+
+                                                if (patternTimings[i].From.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].From.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i - 1].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                if (patternTimings[i].From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                string activity = "setDown";
+
+                                                if (patternTimings[i].To.Activity != null)
+                                                {
+                                                    activity = patternTimings[i].To.Activity;
+                                                }
+
+                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                                if (patternTimings[i].To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                    }
+                                                    else
+                                                    {
+                                                        departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                    }
+                                                }
+
+                                                stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                                stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                if (patternTimings[i].To.WaitTime != null)
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                                }
-                                                else
-                                                {
-                                                    departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                                }
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
+                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
@@ -3105,93 +3369,117 @@ namespace TransXChange.Common.Helpers
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TXCStop stop = new TXCStop();
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUp";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(TimeSpan.Zero);
+                                            departureTime = departureTime.Value.Add(TimeSpan.Zero);
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "pickUpAndSetDown";
+
+                                            if (patternTimings[i].From.Activity != null)
+                                            {
+                                                activity = patternTimings[i].From.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i - 1].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            if (patternTimings[i].From.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            string activity = "setDown";
+
+                                            if (patternTimings[i].To.Activity != null)
+                                            {
+                                                activity = patternTimings[i].To.Activity;
+                                            }
+
+                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime) > TimeSpan.Zero ? XmlConvert.ToTimeSpan(patternTimings[i].RunTime) : TimeSpan.FromMinutes(1));
+
+                                            if (patternTimings[i].To.WaitTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime) > TimeSpan.Zero)
+                                                {
+                                                    departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
+                                                }
+                                                else
+                                                {
+                                                    departureTime = departureTime.Value.Add(TimeSpan.FromMinutes(1));
+                                                }
+                                            }
+
+                                            stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
+                                            stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            if (patternTimings[i].To.WaitTime != null)
-                                            {
-                                                departureTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].To.WaitTime));
-                                            }
-                                            else
-                                            {
-                                                departureTime = arrivalTime.Value.Add(TimeSpan.Zero);
-                                            }
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
+                                        includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                     }
 
                                     includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);

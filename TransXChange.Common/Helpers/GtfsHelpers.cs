@@ -388,20 +388,25 @@ namespace TransXChange.Common.Helpers
                         timeSpan = schedule.Stops[i].DepartureTime;
                     }
 
-                    if (i == 0)
+                    if (schedule.Stops[i].Activity == "pickUp")
                     {
                         stopTime.PickupType = "0";
                         stopTime.DropOffType = "1";
                     }
-                    else if (i > 0 && i < schedule.Stops.Count - 1)
+                    else if (schedule.Stops[i].Activity == "pickUpAndSetDown")
                     {
                         stopTime.PickupType = "0";
                         stopTime.DropOffType = "0";
                     }
-                    else if (i == schedule.Stops.Count - 1)
+                    else if (schedule.Stops[i].Activity == "setDown")
                     {
                         stopTime.PickupType = "1";
                         stopTime.DropOffType = "0";
+                    }
+                    else
+                    {
+                        stopTime.PickupType = "1";
+                        stopTime.DropOffType = "1";
                     }
 
                     string id = Guid.NewGuid().ToString();
