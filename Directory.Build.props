@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup>
+        <TargetFrameworkVersion>net7.0</TargetFrameworkVersion> <!-- net7.0 | net6.0 -->
+        <TestDevelopmentVersion>17.6.3</TestDevelopmentVersion> <!-- Microsoft.NET.Test.Sdk -->
+        <TestFrameworkVersion>3.1.1</TestFrameworkVersion> <!-- MSTest.Test -->
+
+        <CommandClientVersion>2.9.1</CommandClientVersion> <!-- CommandLineParser -->
+        <CoordinateLibraryVersion>2.19.1.1</CoordinateLibraryVersion> <!-- CoordinateSharp -->
+        <CsvLibraryVersion>30.0.1</CsvLibraryVersion> <!-- CsvHelper -->
+        <DateLibraryVersion>1.43.0</DateLibraryVersion> <!-- Nager.Date -->
+        <TimeLibraryVersion>3.1.9</TimeLibraryVersion> <!-- NodaTime -->
+    </PropertyGroup>
+</Project>
