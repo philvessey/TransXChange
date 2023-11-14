@@ -10,5 +10,8 @@ namespace TransXChange.Common.Models
 
 		[XmlElement(ElementName = "CommonName", Namespace = "http://www.transxchange.org.uk/")]
 		public string CommonName { get; set; }
+
+		[XmlElement(ElementName = "LocalityName", Namespace = "http://www.transxchange.org.uk/")]
+		public string LocalityName { get; set; }
 	}
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using TransXChange.Common.Models;
 
@@ -6,12 +7,13 @@ namespace TransXChange.Common.Utils
 {
     public static class StopUtils
     {
-        public static TXCStop Build(Dictionary<string, NAPTANStop> stops, string reference)
+        public static TXCStop Build(Dictionary<string, NAPTANStop> stops, TXCXmlAnnotatedStopPointRef stopPoint)
         {
             return new TXCStop()
             {
-                ATCOCode = reference,
-                NaptanStop = GetNaptan(stops, reference)
+                ATCOCode = stopPoint.StopPointRef,
+                NaptanStop = GetNaptan(stops, stopPoint.StopPointRef),
+                TravelineStop = GetTraveline(stopPoint.StopPointRef, stopPoint.CommonName, stopPoint.LocalityName)
             };
         }
 
@@ -23,13 +25,18 @@ namespace TransXChange.Common.Utils
                 {
                     if (mode == "bus")
                     {
-                        if (stop.NaptanStop.StopType == "BCS")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "BCS")
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    {
+                                        includeSchedule = true;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -40,13 +47,18 @@ namespace TransXChange.Common.Utils
                                 includeSchedule = true;
                             }
                         }
-                        else if (stop.NaptanStop.StopType == "BCT")
+                        else if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "BCT")
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    {
+                                        includeSchedule = true;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -60,13 +72,18 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "city-rail")
                     {
-                        if (stop.NaptanStop.StopType == "RLY")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "RLY")
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    {
+                                        includeSchedule = true;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -80,13 +97,18 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "ferry")
                     {
-                        if (stop.NaptanStop.StopType == "FBT")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "FBT")
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    {
+                                        includeSchedule = true;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -100,13 +122,18 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "light-rail")
                     {
-                        if (stop.NaptanStop.StopType == "PLT")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "PLT")
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    {
+                                        includeSchedule = true;
+                                    }
+
+                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                                     {
                                         includeSchedule = true;
                                     }
@@ -125,7 +152,12 @@ namespace TransXChange.Common.Utils
                     {
                         foreach (string filter in filters)
                         {
-                            if (stop.NaptanStop.ATCOCode.Contains(filter))
+                            if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                            {
+                                includeSchedule = true;
+                            }
+
+                            if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
                             {
                                 includeSchedule = true;
                             }
@@ -143,12 +175,7 @@ namespace TransXChange.Common.Utils
 
         private static NAPTANStop GetNaptan(Dictionary<string, NAPTANStop> stops, string reference)
         {
-            NAPTANStop result = new NAPTANStop()
-            {
-                ATCOCode = reference,
-                CommonName = "Unknown NaPTAN Stop",
-                StopType = "ZZZ"
-            };
+            NAPTANStop result = new NAPTANStop();
 
             if (stops.ContainsKey(reference))
             {
@@ -163,9 +190,21 @@ namespace TransXChange.Common.Utils
                 {
                     result.Latitude = CoordinateUtils.GetFromEastingNorthing(double.Parse(result.Easting), double.Parse(result.Northing)).Latitude.ToString();
                 }
+
+                return result;
             }
 
             return result;
+        }
+
+        private static TRAVELINEStop GetTraveline(string reference, string commonName, string localityName)
+        {
+            return new TRAVELINEStop()
+            {
+                StopPointReference = reference,
+                CommonName = commonName,
+                LocalityName = localityName
+            };
         }
     }
 }
