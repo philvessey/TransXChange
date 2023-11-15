@@ -268,14 +268,62 @@ namespace TransXChange.Common.Helpers
                 {
                     GTFSStop stop = new GTFSStop()
                     {
-                        StopId = schedule.Stops[i].NaptanStop.ATCOCode ?? schedule.Stops[i].TravelineStop.StopPointReference,
-                        StopCode = schedule.Stops[i].NaptanStop.NaptanCode ?? string.Empty,
-                        StopName = schedule.Stops[i].NaptanStop.CommonName ?? schedule.Stops[i].TravelineStop.CommonName,
-                        StopDesc = schedule.Stops[i].NaptanStop.LocalityName ?? schedule.Stops[i].TravelineStop.LocalityName,
-                        StopLon = schedule.Stops[i].NaptanStop.Longitude ?? string.Empty,
-                        StopLat = schedule.Stops[i].NaptanStop.Latitude ?? string.Empty,
                         StopTimezone = "Europe/London"
                     };
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopId = schedule.Stops[i].NaptanStop.ATCOCode;
+                    }
+                    else
+                    {
+                        stop.StopId = schedule.Stops[i].TravelineStop.StopPointReference;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopCode = schedule.Stops[i].NaptanStop.NaptanCode;
+                    }
+                    else
+                    {
+                        stop.StopCode = string.Empty;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopName = schedule.Stops[i].NaptanStop.CommonName;
+                    }
+                    else
+                    {
+                        stop.StopName = schedule.Stops[i].TravelineStop.CommonName;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopDesc = schedule.Stops[i].NaptanStop.LocalityName;
+                    }
+                    else
+                    {
+                        stop.StopDesc = schedule.Stops[i].TravelineStop.LocalityName;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopLat = schedule.Stops[i].NaptanStop.Latitude;
+                    }
+                    else
+                    {
+                        stop.StopLat = string.Empty;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stop.StopLon = schedule.Stops[i].NaptanStop.Longitude;
+                    }
+                    else
+                    {
+                        stop.StopLon = string.Empty;
+                    }
 
                     if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
                     {
@@ -387,7 +435,6 @@ namespace TransXChange.Common.Helpers
                     GTFSStopTime stopTime = new GTFSStopTime()
                     {
                         TripId = schedule.Id,
-                        StopId = schedule.Stops[i].NaptanStop.ATCOCode ?? schedule.Stops[i].TravelineStop.StopPointReference,
                         StopSequence = Convert.ToString(i + 1)
                     };
 
@@ -407,6 +454,15 @@ namespace TransXChange.Common.Helpers
                         stopTime.DepartureTime = schedule.Stops[i].DepartureTime.ToString(@"hh\:mm\:ss");
 
                         timeSpan = schedule.Stops[i].DepartureTime;
+                    }
+
+                    if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
+                    {
+                        stopTime.StopId = schedule.Stops[i].NaptanStop.ATCOCode;
+                    }
+                    else
+                    {
+                        stopTime.StopId = schedule.Stops[i].TravelineStop.StopPointReference;
                     }
 
                     if (schedule.Stops[i].Activity == "pickUp")
@@ -448,9 +504,17 @@ namespace TransXChange.Common.Helpers
                     RouteId = schedule.ServiceCode,
                     ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
                     TripId = schedule.Id,
-                    TripHeadsign = schedule.Stops.LastOrDefault().NaptanStop.CommonName ?? schedule.Stops.LastOrDefault().TravelineStop.CommonName,
                     DirectionId = schedule.Direction
                 };
+
+                if (!string.IsNullOrEmpty(schedule.Stops.LastOrDefault().NaptanStop.StopType))
+                {
+                    trip.TripHeadsign = schedule.Stops.LastOrDefault().NaptanStop.CommonName;
+                }
+                else
+                {
+                    trip.TripHeadsign = schedule.Stops.LastOrDefault().TravelineStop.CommonName;
+                }
 
                 string id = Guid.NewGuid().ToString();
 

@@ -12,8 +12,8 @@ namespace TransXChange.Common.Utils
             return new TXCStop()
             {
                 ATCOCode = stopPoint.StopPointRef,
-                NaptanStop = GetNaptan(stops, stopPoint.StopPointRef),
-                TravelineStop = GetTraveline(stopPoint.StopPointRef, stopPoint.CommonName, stopPoint.LocalityName)
+                NaptanStop = GetNaptan(stops, stopPoint.StopPointRef, stopPoint.CommonName ?? "Unknown NaPTAN Stop", stopPoint.LocalityName ?? "Unknown NaPTAN Locality"),
+                TravelineStop = GetTraveline(stops, stopPoint.StopPointRef, stopPoint.CommonName ?? "Unknown Traveline Stop", stopPoint.LocalityName ?? "Unknown Traveline Locality")
             };
         }
 
@@ -25,40 +25,49 @@ namespace TransXChange.Common.Utils
                 {
                     if (mode == "bus")
                     {
-                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "BCS")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType))
                         {
-                            if (!filters.Contains("all"))
+                            if (stop.NaptanStop.StopType == "BCS" || stop.NaptanStop.StopType == "BCT")
                             {
-                                foreach (string filter in filters)
+                                if (!filters.Contains("all"))
                                 {
-                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    foreach (string filter in filters)
                                     {
-                                        includeSchedule = true;
-                                    }
-
-                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
-                                    {
-                                        includeSchedule = true;
+                                        if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
                                     }
                                 }
-                            }
-                            else
-                            {
-                                includeSchedule = true;
+                                else
+                                {
+                                    includeSchedule = true;
+                                }
                             }
                         }
-                        else if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "BCT")
+                        else
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
-
-                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
+                                    else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                    {
+                                        includeSchedule = true;
+                                    }
+                                    else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
@@ -72,18 +81,49 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "city-rail")
                     {
-                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "RLY")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType))
+                        {
+                            if (stop.NaptanStop.StopType == "RLY")
+                            {
+                                if (!filters.Contains("all"))
+                                {
+                                    foreach (string filter in filters)
+                                    {
+                                        if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    includeSchedule = true;
+                                }
+                            }
+                        }
+                        else
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
-
-                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
+                                    else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                    {
+                                        includeSchedule = true;
+                                    }
+                                    else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
@@ -97,18 +137,49 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "ferry")
                     {
-                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "FBT")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType))
+                        {
+                            if (stop.NaptanStop.StopType == "FBT")
+                            {
+                                if (!filters.Contains("all"))
+                                {
+                                    foreach (string filter in filters)
+                                    {
+                                        if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    includeSchedule = true;
+                                }
+                            }
+                        }
+                        else
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
-
-                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
+                                    else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                    {
+                                        includeSchedule = true;
+                                    }
+                                    else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
@@ -122,18 +193,49 @@ namespace TransXChange.Common.Utils
                     }
                     else if (mode == "light-rail")
                     {
-                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType) && stop.NaptanStop.StopType == "PLT")
+                        if (!string.IsNullOrEmpty(stop.NaptanStop.StopType))
+                        {
+                            if (stop.NaptanStop.StopType == "PLT")
+                            {
+                                if (!filters.Contains("all"))
+                                {
+                                    foreach (string filter in filters)
+                                    {
+                                        if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                        else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                        {
+                                            includeSchedule = true;
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    includeSchedule = true;
+                                }
+                            }
+                        }
+                        else
                         {
                             if (!filters.Contains("all"))
                             {
                                 foreach (string filter in filters)
                                 {
-                                    if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                                    if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
-
-                                    if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
+                                    else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                    {
+                                        includeSchedule = true;
+                                    }
+                                    else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
                                     {
                                         includeSchedule = true;
                                     }
@@ -148,24 +250,55 @@ namespace TransXChange.Common.Utils
                 }
                 else
                 {
-                    if (!filters.Contains("all"))
+                    if (!string.IsNullOrEmpty(stop.NaptanStop.StopType))
                     {
-                        foreach (string filter in filters)
+                        if (!filters.Contains("all"))
                         {
-                            if (!string.IsNullOrEmpty(stop.NaptanStop.ATCOCode) && stop.NaptanStop.ATCOCode.Contains(filter))
+                            foreach (string filter in filters)
                             {
-                                includeSchedule = true;
+                                if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
+                                else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
+                                else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
                             }
-
-                            if (!string.IsNullOrEmpty(stop.TravelineStop.StopPointReference) && stop.TravelineStop.StopPointReference.Contains(filter))
-                            {
-                                includeSchedule = true;
-                            }
+                        }
+                        else
+                        {
+                            includeSchedule = true;
                         }
                     }
                     else
                     {
-                        includeSchedule = true;
+                        if (!filters.Contains("all"))
+                        {
+                            foreach (string filter in filters)
+                            {
+                                if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
+                                else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
+                                else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                                {
+                                    includeSchedule = true;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            includeSchedule = true;
+                        }
                     }
                 }
             }
@@ -173,9 +306,14 @@ namespace TransXChange.Common.Utils
             return includeSchedule;
         }
 
-        private static NAPTANStop GetNaptan(Dictionary<string, NAPTANStop> stops, string reference)
+        private static NAPTANStop GetNaptan(Dictionary<string, NAPTANStop> stops, string reference, string commonName, string localityName)
         {
-            NAPTANStop result = new NAPTANStop();
+            NAPTANStop result = new NAPTANStop()
+            {
+                ATCOCode = reference,
+                CommonName = commonName,
+                LocalityName = localityName
+            };
 
             if (stops.ContainsKey(reference))
             {
@@ -197,7 +335,7 @@ namespace TransXChange.Common.Utils
             return result;
         }
 
-        private static TRAVELINEStop GetTraveline(string reference, string commonName, string localityName)
+        private static TRAVELINEStop GetTraveline(Dictionary<string, NAPTANStop> stops, string reference, string commonName, string localityName)
         {
             return new TRAVELINEStop()
             {

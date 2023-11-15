@@ -176,6 +176,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -207,7 +209,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -251,7 +253,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -283,7 +285,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -458,6 +460,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -489,7 +493,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -533,7 +537,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -565,7 +569,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -754,6 +758,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -785,7 +791,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -829,7 +835,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -861,7 +867,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1036,6 +1042,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -1067,7 +1075,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1111,7 +1119,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1143,7 +1151,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1340,6 +1348,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -1371,7 +1381,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1415,7 +1425,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1447,7 +1457,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1622,6 +1632,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -1653,7 +1665,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1697,7 +1709,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1729,7 +1741,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -1918,6 +1930,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -1949,7 +1963,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -1993,7 +2007,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2025,7 +2039,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2200,6 +2214,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -2231,7 +2247,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -2275,7 +2291,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -2307,7 +2323,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -2504,6 +2520,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -2535,7 +2553,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2579,7 +2597,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2611,7 +2629,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -2786,6 +2804,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -2817,7 +2837,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -2861,7 +2881,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -2893,7 +2913,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -3082,6 +3102,8 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -3113,7 +3135,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -3157,7 +3179,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -3189,7 +3211,7 @@ namespace TransXChange.Common.Helpers
                                                     }
                                                 }
 
-                                                stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                                stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                                 stop.Activity = activity;
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
@@ -3364,6 +3386,8 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
@@ -3395,7 +3419,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -3439,7 +3463,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
@@ -3471,7 +3495,7 @@ namespace TransXChange.Common.Helpers
                                                 }
                                             }
 
-                                            stop = StopUtils.Build(stops, xml.StopPoints.AnnotatedStopPointRef.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault());
+                                            stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
                                             stop.Activity = activity;
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
