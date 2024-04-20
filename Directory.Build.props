@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFrameworkVersion>net7.0</TargetFrameworkVersion> <!-- net7.0 | net6.0 -->
+        <TargetFrameworkVersion>net8.0</TargetFrameworkVersion> <!-- net8.0 -->
         <TestDevelopmentVersion>17.8.0</TestDevelopmentVersion> <!-- Microsoft.NET.Test.Sdk -->
         <TestFrameworkVersion>3.1.1</TestFrameworkVersion> <!-- MSTest.Test -->
 
