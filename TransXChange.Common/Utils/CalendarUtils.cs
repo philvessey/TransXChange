@@ -9,7 +9,7 @@ namespace TransXChange.Common.Utils
     {
         public static TXCCalendar Build(TXCXmlOperatingProfile operatingProfile, DateTime startDate, DateTime endDate)
         {
-            TXCCalendar result = new TXCCalendar()
+            TXCCalendar result = new()
             {
                 Monday = false,
                 Tuesday = false,

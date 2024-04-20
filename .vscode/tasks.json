@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         { 
-            "label": "net7.0 England Test", 
+            "label": "England Test", 
             "type": "process", 
             "args": [ "test" ], 
             "isBackground": true, 
@@ -15,7 +15,7 @@
             "problemMatcher": [] 
         }, 
         { 
-            "label": "net7.0 Scotland Test", 
+            "label": "Scotland Test", 
             "type": "process", 
             "args": [ "test" ], 
             "isBackground": true, 
@@ -28,7 +28,7 @@
             "problemMatcher": [] 
         }, 
         { 
-            "label": "net7.0 Wales Test", 
+            "label": "Wales Test", 
             "type": "process", 
             "args": [ "test" ], 
             "isBackground": true, 

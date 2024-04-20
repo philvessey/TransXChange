@@ -9,13 +9,13 @@ namespace TransXChange.Common.Utils
     {
         public static TXCSchedule Build(TXCXmlOperator @operator, TXCXmlService service, TXCXmlJourneyPattern journeyPattern, TXCCalendar calendar)
         {
-            TXCSchedule result = new TXCSchedule()
+            TXCSchedule result = new()
             {
                 Id = Guid.NewGuid().ToString(),
                 Line = service.Lines.Line.LineName,
                 ServiceCode = service.ServiceCode,
                 Calendar = calendar,
-                Stops = new List<TXCStop>()
+                Stops = []
             };
 
             if (service.Description != null)
