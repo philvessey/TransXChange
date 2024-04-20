@@ -44,8 +44,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -176,82 +174,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -270,8 +343,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -402,82 +473,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
@@ -510,8 +656,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -642,82 +786,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -736,8 +955,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -868,82 +1085,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
@@ -984,8 +1276,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -1116,82 +1406,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -1210,8 +1575,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -1342,82 +1705,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
@@ -1450,8 +1888,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -1582,82 +2018,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -1676,8 +2187,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -1808,82 +2317,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
@@ -1924,8 +2508,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -2056,82 +2638,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -2150,8 +2807,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -2282,82 +2937,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
@@ -2390,8 +3120,6 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        bool includeSchedule = false;
-
                                         DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                         DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -2522,82 +3250,157 @@ namespace TransXChange.Common.Helpers
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                         TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                        List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                         TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                         List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                         for (int i = 0; i < patternTimings?.Count; i++)
                                         {
+                                            TimeSpan runTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                    }
+                                                }
+                                            }
+
+                                            TimeSpan waitTime = TimeSpan.Zero;
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From != null)
+                                                {
+                                                    if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                    {
+                                                        if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                        {
+                                                            waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                        }
+                                                    }
+                                                }
+                                            }
+
+                                            if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                    {
+                                                        runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                    }
+                                                }
+                                            }
+                                            
+                                            arrivalTime = departureTime.Value.Add(runTime);
+                                            departureTime = arrivalTime.Value.Add(waitTime);
+
                                             if (i == 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
-                                            if (i > 0 && i < patternTimings.Count - 1)
+                                            if (i > 0)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                                stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
 
                                             if (i == patternTimings.Count - 1)
                                             {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                                TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                                stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                                 stop.ArrivalTime = arrivalTime.Value;
                                                 stop.DepartureTime = departureTime.Value;
 
                                                 schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                            }
-
-                                            if (i == patternTimings.Count - 1)
-                                            {
-                                                TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                                stop.ArrivalTime = arrivalTime.Value;
-                                                stop.DepartureTime = departureTime.Value;
-
-                                                schedule.Stops.Add(stop);
-
-                                                arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                                departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                                includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                             }
                                         }
 
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                        includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                        if (includeSchedule)
+                                        if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                         {
-                                            dictionary.Add(schedule.Id, schedule);
+                                            continue;
                                         }
+
+                                        if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                        {
+                                            continue;
+                                        }
+
+                                        dictionary.Add(schedule.Id, schedule);
                                     }
                                 }
                             }
@@ -2616,8 +3419,6 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    bool includeSchedule = false;
-
                                     DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
                                     DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
 
@@ -2748,82 +3549,157 @@ namespace TransXChange.Common.Helpers
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
                                     TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
 
+                                    List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
+
                                     TXCXmlJourneyPatternSection patternSection = xml.JourneyPatternSections?.JourneyPatternSection.Where(s => s.Id == journeyPattern.JourneyPatternSectionRefs).FirstOrDefault();
                                     List<TXCXmlJourneyPatternTimingLink> patternTimings = patternSection?.JourneyPatternTimingLink;
 
                                     for (int i = 0; i < patternTimings?.Count; i++)
                                     {
+                                        TimeSpan runTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) > TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime));
+                                                }
+                                            }
+                                        }
+
+                                        TimeSpan waitTime = TimeSpan.Zero;
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).To != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i - 1).To.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i - 1].To.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i).From != null)
+                                            {
+                                                if (patternTimings.ElementAtOrDefault(i).From.WaitTime != null)
+                                                {
+                                                    if (XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime) > TimeSpan.Zero)
+                                                    {
+                                                        waitTime = waitTime.Add(XmlConvert.ToTimeSpan(patternTimings[i].From.WaitTime));
+                                                    }
+                                                }
+                                            }
+                                        }
+
+                                        if (patternTimings.ElementAtOrDefault(i - 1) != null)
+                                        {
+                                            if (patternTimings.ElementAtOrDefault(i - 1).RunTime != null)
+                                            {
+                                                if (XmlConvert.ToTimeSpan(patternTimings[i - 1].RunTime) == TimeSpan.Zero && waitTime == TimeSpan.Zero)
+                                                {
+                                                    runTime = runTime.Add(TimeSpan.FromSeconds(30));
+                                                }
+                                            }
+                                        }
+                                        
+                                        arrivalTime = departureTime.Value.Add(runTime);
+                                        departureTime = arrivalTime.Value.Add(waitTime);
+
                                         if (i == 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUp";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
-                                        if (i > 0 && i < patternTimings.Count - 1)
+                                        if (i > 0)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].From.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].From.StopPointRef });
+                                            stop.Activity = patternTimings[i].From.Activity ?? "pickUpAndSetDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
 
                                         if (i == patternTimings.Count - 1)
                                         {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].From.StopPointRef);
+                                            TXCStop stop = StopUtils.Build(stops, stopPoints.Where(s => s.StopPointRef == patternTimings[i].To.StopPointRef).FirstOrDefault() ?? new TXCXmlAnnotatedStopPointRef() { StopPointRef = patternTimings[i].To.StopPointRef });
+                                            stop.Activity = patternTimings[i].To.Activity ?? "setDown";
                                             stop.ArrivalTime = arrivalTime.Value;
                                             stop.DepartureTime = departureTime.Value;
 
                                             schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
-                                        }
-
-                                        if (i == patternTimings.Count - 1)
-                                        {
-                                            TXCStop stop = StopUtils.Build(stops, patternTimings[i].To.StopPointRef);
-                                            stop.ArrivalTime = arrivalTime.Value;
-                                            stop.DepartureTime = departureTime.Value;
-
-                                            schedule.Stops.Add(stop);
-
-                                            arrivalTime = arrivalTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-                                            departureTime = departureTime.Value.Add(XmlConvert.ToTimeSpan(patternTimings[i].RunTime));
-
-                                            includeSchedule = StopUtils.GetFilter(includeSchedule, mode, filters, stop);
                                         }
                                     }
 
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-                                    includeSchedule = ScheduleUtils.GetDuplicate(includeSchedule, dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule);
-
-                                    if (includeSchedule)
+                                    if (!StopUtils.CheckFilter(filters, schedule.Stops))
                                     {
-                                        dictionary.Add(schedule.Id, schedule);
+                                        continue;
                                     }
+
+                                    if (!StopUtils.CheckMode(mode, schedule.Stops))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.RunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.RunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    if (ScheduleUtils.CheckDuplicate(dictionary.Values.Where(s => s.Calendar.SupplementNonRunningDates.Intersect(schedule.Calendar.SupplementNonRunningDates).Any() && s.Id != schedule.Id), schedule))
+                                    {
+                                        continue;
+                                    }
+
+                                    dictionary.Add(schedule.Id, schedule);
                                 }
                             }
                         }
