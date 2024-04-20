@@ -27,15 +27,15 @@ namespace TransXChange.Common.Utils
                     {
                         foreach (string filter in filters)
                         {
-                            if (stop.NaptanStop.ATCOCode.ToLower().Contains(filter.ToLower()))
+                            if (stop.NaptanStop.ATCOCode.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.NaptanStop.CommonName.ToLower().Contains(filter.ToLower()))
+                            else if (stop.NaptanStop.CommonName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.NaptanStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                            else if (stop.NaptanStop.LocalityName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
@@ -52,15 +52,15 @@ namespace TransXChange.Common.Utils
                     {
                         foreach (string filter in filters)
                         {
-                            if (stop.TravelineStop.StopPointReference.ToLower().Contains(filter.ToLower()))
+                            if (stop.TravelineStop.StopPointReference.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.TravelineStop.CommonName.ToLower().Contains(filter.ToLower()))
+                            else if (stop.TravelineStop.CommonName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.TravelineStop.LocalityName.ToLower().Contains(filter.ToLower()))
+                            else if (stop.TravelineStop.LocalityName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
@@ -150,16 +150,16 @@ namespace TransXChange.Common.Utils
 
         private static NAPTANStop GetNaptan(Dictionary<string, NAPTANStop> stops, string reference, string commonName, string localityName)
         {
-            NAPTANStop result = new NAPTANStop()
+            NAPTANStop result = new()
             {
                 ATCOCode = reference,
                 CommonName = commonName,
                 LocalityName = localityName
             };
 
-            if (stops.ContainsKey(reference))
+            if (stops.TryGetValue(reference, out NAPTANStop value))
             {
-                result = stops[reference];
+                result = value;
 
                 if (string.IsNullOrEmpty(result.Longitude))
                 {
