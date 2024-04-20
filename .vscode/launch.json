@@ -2,7 +2,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "net7.0 Attach",
+            "name": "Attach",
             "type": "coreclr",
             "request": "attach"
         }
