@@ -1,4 +1,4 @@
-﻿using Nager.Date.Model;
+﻿using Nager.Date.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -87,11 +87,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -105,11 +105,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -386,11 +386,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -404,11 +404,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -699,11 +699,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -717,11 +717,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -998,11 +998,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationEngland(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1016,11 +1016,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationEngland(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1319,11 +1319,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1337,11 +1337,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1618,11 +1618,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1636,11 +1636,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -1931,11 +1931,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -1949,11 +1949,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -2230,11 +2230,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationScotland(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2248,11 +2248,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationScotland(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2551,11 +2551,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -2569,11 +2569,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -2850,11 +2850,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -2868,11 +2868,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -3163,11 +3163,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -3181,11 +3181,11 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
+                                                List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
 
-                                                for (int i = 0; i < publicHolidays.Count; i++)
+                                                for (int i = 0; i < holidays.Count; i++)
                                                 {
-                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                    DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                     if (holidayDate != null)
                                                     {
@@ -3462,11 +3462,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfOperationWales(daysOfOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {
@@ -3480,11 +3480,11 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            List<PublicHoliday> publicHolidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
+                                            List<Holiday> holidays = BankHolidayUtils.GetDaysOfNonOperationWales(daysOfNonOperation, calendar, key);
 
-                                            for (int i = 0; i < publicHolidays.Count; i++)
+                                            for (int i = 0; i < holidays.Count; i++)
                                             {
-                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(publicHolidays[i].Date, scheduleDate, days);
+                                                DateTime? holidayDate = DateTimeUtils.GetHolidayDate(holidays[i].Date, scheduleDate, days);
 
                                                 if (holidayDate != null)
                                                 {

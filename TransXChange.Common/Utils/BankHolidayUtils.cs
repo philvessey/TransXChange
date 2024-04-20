@@ -1,5 +1,5 @@
 ﻿using Nager.Date;
-using Nager.Date.Model;
+using Nager.Date.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,13 +9,13 @@ namespace TransXChange.Common.Utils
 {
     public static class BankHolidayUtils
     {
-        public static List<PublicHoliday> GetDaysOfOperationEngland(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfOperationEngland(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfOperation.AllBankHolidays != null)
@@ -93,13 +93,13 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        public static List<PublicHoliday> GetDaysOfNonOperationEngland(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfNonOperationEngland(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfNonOperation.AllBankHolidays != null)
@@ -177,13 +177,13 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        public static List<PublicHoliday> GetDaysOfOperationScotland(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfOperationScotland(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfOperation.AllBankHolidays != null)
@@ -275,13 +275,13 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        public static List<PublicHoliday> GetDaysOfNonOperationScotland(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfNonOperationScotland(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfNonOperation.AllBankHolidays != null)
@@ -373,13 +373,13 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        public static List<PublicHoliday> GetDaysOfOperationWales(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfOperationWales(TXCXmlDaysOfOperation daysOfOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfOperation.AllBankHolidays != null)
@@ -457,13 +457,13 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        public static List<PublicHoliday> GetDaysOfNonOperationWales(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
+        public static List<Holiday> GetDaysOfNonOperationWales(TXCXmlDaysOfNonOperation daysOfNonOperation, TXCCalendar calendar, string key)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            if (string.IsNullOrEmpty(DateSystem.LicenseKey))
+            if (string.IsNullOrEmpty(HolidaySystem.LicenseKey))
             {
-                DateSystem.LicenseKey = key;
+                HolidaySystem.LicenseKey = key;
             }
 
             if (daysOfNonOperation.AllBankHolidays != null)
@@ -541,11 +541,27 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetNewYearsDay(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetNewYearsDay(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 1, 1),
+                    LocalName = "New Year's Day",
+                    EnglishName = "New Year's Day",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 1, 1, "New Year's Day", "New Year's Day", CountryCode.GB);
+            return results;
+        }
+
+        private static List<Holiday> GetNewYearsDayHoliday(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results = [];
+
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.SubdivisionCodes != null && h.SubdivisionCodes.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -555,11 +571,27 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetNewYearsDayHoliday(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetJan2ndScotland(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 1, 2),
+                    LocalName = "New Year's Day",
+                    EnglishName = "New Year's Day",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            return results;
+        }
+
+        private static List<Holiday> GetJan2ndScotlandHoliday(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results = [];
+
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.SubdivisionCodes != null && h.SubdivisionCodes.Contains("GB-SCT")).LastOrDefault();
 
             if (holiday != null)
             {
@@ -569,11 +601,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetJan2ndScotland(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetGoodFriday(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 1, 2, "New Year's Day", "New Year's Day", CountryCode.GB);
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Good Friday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -583,11 +615,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetJan2ndScotlandHoliday(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetEasterMonday(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "New Year's Day" && h.Counties != null && h.Counties.Contains("GB-SCT")).LastOrDefault();
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Easter Monday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -597,11 +629,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetGoodFriday(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetMayDay(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Good Friday").FirstOrDefault();
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Early May Bank Holiday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -611,11 +643,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetEasterMonday(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetSpringBank(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Easter Monday").FirstOrDefault();
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Spring Bank Holiday").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -625,11 +657,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetMayDay(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetAugustBankHolidayScotland(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Early May Bank Holiday").FirstOrDefault();
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.SubdivisionCodes != null && h.SubdivisionCodes.Contains("GB-SCT")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -639,11 +671,11 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetSpringBank(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetLateSummerBankHolidayNotScotland(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results = [];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Spring Bank Holiday").FirstOrDefault();
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.SubdivisionCodes != null && h.SubdivisionCodes.Contains("GB-ENG")).FirstOrDefault();
 
             if (holiday != null)
             {
@@ -653,11 +685,27 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetAugustBankHolidayScotland(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetStAndrewsDay(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 11, 30),
+                    LocalName = "Saint Andrew's Day",
+                    EnglishName = "Saint Andrew's Day",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-SCT")).FirstOrDefault();
+            return results;
+        }
+
+        private static List<Holiday> GetStAndrewsDayHoliday(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results = [];
+
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Saint Andrew's Day").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -667,11 +715,43 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetLateSummerBankHolidayNotScotland(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetChristmasEve(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 24),
+                    LocalName = "Christmas Eve",
+                    EnglishName = "Christmas Eve",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Summer Bank Holiday" && h.Counties != null && h.Counties.Contains("GB-ENG")).FirstOrDefault();
+            return results;
+        }
+
+        private static List<Holiday> GetChristmasDay(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 25),
+                    LocalName = "Christmas Day",
+                    EnglishName = "Christmas Day",
+                    CountryCode = CountryCode.GB
+                },
+            ];
+
+            return results;
+        }
+
+        private static List<Holiday> GetChristmasDayHoliday(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results = [];
+
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Christmas Day").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -681,11 +761,27 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetStAndrewsDay(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetBoxingDay(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 26),
+                    LocalName = "Boxing Day",
+                    EnglishName = "St. Stephen's Day",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 11, 30, "Saint Andrew's Day", "Saint Andrew's Day", CountryCode.GB);
+            return results;
+        }
+
+        private static List<Holiday> GetBoxingDayHoliday(DateTime startDate, DateTime endDate)
+        {
+            List<Holiday> results = [];
+
+            Holiday holiday = HolidaySystem.GetHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Boxing Day").FirstOrDefault();
 
             if (holiday != null)
             {
@@ -695,100 +791,18 @@ namespace TransXChange.Common.Utils
             return results;
         }
 
-        private static List<PublicHoliday> GetStAndrewsDayHoliday(DateTime startDate, DateTime endDate)
+        private static List<Holiday> GetNewYearsEve(DateTime startDate, DateTime endDate)
         {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Saint Andrew's Day").FirstOrDefault();
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetChristmasEve(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 24, "Christmas Eve", "Christmas Eve", CountryCode.GB);
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetChristmasDay(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 25, "Christmas Day", "Christmas Day", CountryCode.GB);
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetChristmasDayHoliday(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Christmas Day").FirstOrDefault();
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetBoxingDay(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 26, "Boxing Day", "St. Stephen's Day", CountryCode.GB);
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetBoxingDayHoliday(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = DateSystem.GetPublicHolidays(startDate, endDate, CountryCode.GB).Where(h => h.LocalName == "Boxing Day").FirstOrDefault();
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
-
-            return results;
-        }
-
-        private static List<PublicHoliday> GetNewYearsEve(DateTime startDate, DateTime endDate)
-        {
-            List<PublicHoliday> results = new List<PublicHoliday>();
-
-            PublicHoliday holiday = new PublicHoliday(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 31, "New Year's Eve", "New Year's Eve", CountryCode.GB);
-
-            if (holiday != null)
-            {
-                results.Add(holiday);
-            }
+            List<Holiday> results =
+            [
+                new Holiday()
+                {
+                    Date = new DateTime(new DateTime(Math.Max(startDate.Ticks, endDate.Ticks)).Year, 12, 31),
+                    LocalName = "New Year's Eve",
+                    EnglishName = "New Year's Eve",
+                    CountryCode = CountryCode.GB
+                },
+            ];
 
             return results;
         }
