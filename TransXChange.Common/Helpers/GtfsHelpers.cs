@@ -11,20 +11,20 @@ namespace TransXChange.Common.Helpers
 {
     public class GtfsHelpers
     {
-        private Dictionary<string, GTFSAgency> _agencies = new Dictionary<string, GTFSAgency>();
-        private Dictionary<string, GTFSCalendar> _calendars = new Dictionary<string, GTFSCalendar>();
-        private Dictionary<string, GTFSCalendarDate> _calendarDates = new Dictionary<string, GTFSCalendarDate>();
-        private Dictionary<string, GTFSRoute> _routes = new Dictionary<string, GTFSRoute>();
-        private Dictionary<string, GTFSStop> _stops = new Dictionary<string, GTFSStop>();
-        private Dictionary<string, GTFSStopTime> _stopTimes = new Dictionary<string, GTFSStopTime>();
-        private Dictionary<string, GTFSTrip> _trips = new Dictionary<string, GTFSTrip>();
+        private Dictionary<string, GTFSAgency> _agencies = [];
+        private Dictionary<string, GTFSCalendar> _calendars = [];
+        private Dictionary<string, GTFSCalendarDate> _calendarDates = [];
+        private Dictionary<string, GTFSRoute> _routes = [];
+        private Dictionary<string, GTFSStop> _stops = [];
+        private Dictionary<string, GTFSStopTime> _stopTimes = [];
+        private Dictionary<string, GTFSTrip> _trips = [];
 
         public void WriteAgency(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareAgency(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "agency.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "agency.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSAgency>();
             csv.NextRecord();
@@ -40,8 +40,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareCalendar(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "calendar.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "calendar.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSCalendar>();
             csv.NextRecord();
@@ -57,8 +57,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareCalendarDates(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "calendar_dates.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "calendar_dates.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSCalendarDate>();
             csv.NextRecord();
@@ -74,8 +74,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareRoutes(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "routes.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "routes.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSRoute>();
             csv.NextRecord();
@@ -91,8 +91,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareStops(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "stops.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "stops.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSStop>();
             csv.NextRecord();
@@ -108,8 +108,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareStopTimes(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "stop_times.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "stop_times.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSStopTime>();
             csv.NextRecord();
@@ -125,8 +125,8 @@ namespace TransXChange.Common.Helpers
         {
             PrepareTrips(schedules);
 
-            using StreamWriter writer = new StreamWriter(Path.Combine(path, "trips.txt"));
-            using CsvWriter csv = new CsvWriter(writer, CultureInfo.InvariantCulture);
+            using StreamWriter writer = new(Path.Combine(path, "trips.txt"));
+            using CsvWriter csv = new(writer, CultureInfo.InvariantCulture);
 
             csv.WriteHeader<GTFSTrip>();
             csv.NextRecord();
@@ -142,7 +142,7 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
-                GTFSAgency agency = new GTFSAgency()
+                GTFSAgency agency = new()
                 {
                     AgencyId = schedule.OperatorCode,
                     AgencyName = schedule.OperatorName,
@@ -154,12 +154,7 @@ namespace TransXChange.Common.Helpers
                     AgencyEmail = null,
                 };
 
-                string id = agency.AgencyId;
-
-                if (!_agencies.ContainsKey(id))
-                {
-                    _agencies.Add(id, agency);
-                }
+                _agencies.TryAdd(agency.AgencyId, agency);
             }
 
             _agencies = _agencies.OrderBy(a => a.Value.AgencyId).ToDictionary(a => a.Key, a => a.Value);
@@ -169,7 +164,7 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
-                GTFSCalendar calendar = new GTFSCalendar()
+                GTFSCalendar calendar = new()
                 {
                     ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
                     Monday = schedule.Calendar.Monday.ToInt().ToString(),
@@ -183,12 +178,7 @@ namespace TransXChange.Common.Helpers
                     EndDate = string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd"))
                 };
 
-                string id = calendar.ServiceId;
-
-                if (!_calendars.ContainsKey(id))
-                {
-                    _calendars.Add(id, calendar);
-                }
+                _calendars.TryAdd(calendar.ServiceId, calendar);
             }
 
             _calendars = _calendars.OrderBy(c => c.Value.ServiceId).ToDictionary(c => c.Key, c => c.Value);
@@ -200,36 +190,26 @@ namespace TransXChange.Common.Helpers
             {
                 for (int i = 0; i < schedule.Calendar.SupplementRunningDates.Count; i++)
                 {
-                    GTFSCalendarDate calendarDate = new GTFSCalendarDate()
+                    GTFSCalendarDate calendarDate = new()
                     {
                         ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
                         Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementRunningDates[i].ToString("yyyy"), schedule.Calendar.SupplementRunningDates[i].ToString("MM"), schedule.Calendar.SupplementRunningDates[i].ToString("dd")),
                         ExceptionType = "1"
                     };
 
-                    string id = string.Format("{0}-{1}", calendarDate.ServiceId, calendarDate.Date);
-
-                    if (!_calendarDates.ContainsKey(id))
-                    {
-                        _calendarDates.Add(id, calendarDate);
-                    }
+                    _calendarDates.TryAdd(string.Format("{0}-{1}", calendarDate.ServiceId, calendarDate.Date), calendarDate);
                 }
 
                 for (int i = 0; i < schedule.Calendar.SupplementNonRunningDates.Count; i++)
                 {
-                    GTFSCalendarDate calendarDate = new GTFSCalendarDate()
+                    GTFSCalendarDate calendarDate = new()
                     {
                         ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
                         Date = string.Format("{0}{1}{2}", schedule.Calendar.SupplementNonRunningDates[i].ToString("yyyy"), schedule.Calendar.SupplementNonRunningDates[i].ToString("MM"), schedule.Calendar.SupplementNonRunningDates[i].ToString("dd")),
                         ExceptionType = "2"
                     };
 
-                    string id = string.Format("{0}-{1}", calendarDate.ServiceId, calendarDate.Date);
-
-                    if (!_calendarDates.ContainsKey(id))
-                    {
-                        _calendarDates.Add(id, calendarDate);
-                    }
+                    _calendarDates.TryAdd(string.Format("{0}-{1}", calendarDate.ServiceId, calendarDate.Date), calendarDate);
                 }
             }
 
@@ -240,7 +220,7 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
-                GTFSRoute route = new GTFSRoute()
+                GTFSRoute route = new()
                 {
                     RouteId = schedule.ServiceCode,
                     AgencyId = schedule.OperatorCode,
@@ -249,12 +229,7 @@ namespace TransXChange.Common.Helpers
                     RouteType = schedule.Mode
                 };
 
-                string id = route.RouteId;
-
-                if (!_routes.ContainsKey(id))
-                {
-                    _routes.Add(id, route);
-                }
+                _routes.TryAdd(route.RouteId, route);
             }
 
             _routes = _routes.OrderBy(r => r.Value.RouteId).ToDictionary(r => r.Key, r => r.Value);
@@ -266,7 +241,7 @@ namespace TransXChange.Common.Helpers
             {
                 for (int i = 0; i < schedule.Stops.Count; i++)
                 {
-                    GTFSStop stop = new GTFSStop()
+                    GTFSStop stop = new()
                     {
                         StopTimezone = "Europe/London"
                     };
@@ -365,46 +340,46 @@ namespace TransXChange.Common.Helpers
                     {
                         if (schedule.Stops[i].NaptanStop.StopType == "BCS" || schedule.Stops[i].NaptanStop.StopType == "BCQ")
                         {
-                            if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("bay"))
+                            if (schedule.Stops[i].NaptanStop.Indicator.StartsWith("bay", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stance"))
+                            else if (schedule.Stops[i].NaptanStop.Indicator.StartsWith("stance", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stand"))
+                            else if (schedule.Stops[i].NaptanStop.Indicator.StartsWith("stand", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.Indicator.ToLower().StartsWith("stop"))
+                            else if (schedule.Stops[i].NaptanStop.Indicator.StartsWith("stop", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.Indicator.ToLower().Split(" ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("/"))
+                            else if (schedule.Stops[i].NaptanStop.CommonName.Contains("/", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("/").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("bay "))
+                            else if (schedule.Stops[i].NaptanStop.CommonName.Contains("bay ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("bay ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stance "))
+                            else if (schedule.Stops[i].NaptanStop.CommonName.Contains("stance ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stance ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stand "))
+                            else if (schedule.Stops[i].NaptanStop.CommonName.Contains("stand ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stand ").LastOrDefault().Trim();
                             }
-                            else if (schedule.Stops[i].NaptanStop.CommonName.ToLower().Contains("stop "))
+                            else if (schedule.Stops[i].NaptanStop.CommonName.Contains("stop ", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 stop.PlatformCode = schedule.Stops[i].NaptanStop.CommonName.ToLower().Split("stop ").LastOrDefault().Trim();
                             }
                         }
                         else if (schedule.Stops[i].NaptanStop.StopType == "LPL" || schedule.Stops[i].NaptanStop.StopType == "PLT" || schedule.Stops[i].NaptanStop.StopType == "RPL")
                         {
-                            stop.PlatformCode = schedule.Stops[i].NaptanStop.ATCOCode.Substring(schedule.Stops[i].NaptanStop.ATCOCode.Length - 1).ToLower();
+                            stop.PlatformCode = schedule.Stops[i].NaptanStop.ATCOCode[^1..].ToLower();
                         }
                     }
                     else
@@ -412,12 +387,7 @@ namespace TransXChange.Common.Helpers
                         stop.PlatformCode = string.Empty;
                     }
 
-                    string id = stop.StopId;
-
-                    if (!_stops.ContainsKey(id))
-                    {
-                        _stops.Add(id, stop);
-                    }
+                    _stops.TryAdd(stop.StopId, stop);
                 }
             }
 
@@ -428,11 +398,11 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
-                TimeSpan timeSpan = new TimeSpan();
+                TimeSpan timeSpan = new();
 
                 for (int i = 0; i < schedule.Stops.Count; i++)
                 {
-                    GTFSStopTime stopTime = new GTFSStopTime()
+                    GTFSStopTime stopTime = new()
                     {
                         TripId = schedule.Id,
                         StopSequence = Convert.ToString(i + 1)
@@ -443,8 +413,8 @@ namespace TransXChange.Common.Helpers
                         schedule.Stops[i].ArrivalTime = schedule.Stops[i].ArrivalTime.Add(new TimeSpan(24, 0, 0));
                         schedule.Stops[i].DepartureTime = schedule.Stops[i].DepartureTime.Add(new TimeSpan(24, 0, 0));
 
-                        stopTime.ArrivalTime = Math.Round(schedule.Stops[i].ArrivalTime.TotalHours, 0).ToString() + schedule.Stops[i].ArrivalTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
-                        stopTime.DepartureTime = Math.Round(schedule.Stops[i].DepartureTime.TotalHours, 0).ToString() + schedule.Stops[i].DepartureTime.ToString(@"hh\:mm\:ss").Substring(2, 6);
+                        stopTime.ArrivalTime = string.Concat(Math.Round(schedule.Stops[i].ArrivalTime.TotalHours, 0).ToString(), schedule.Stops[i].ArrivalTime.ToString(@"hh\:mm\:ss").AsSpan(2, 6));
+                        stopTime.DepartureTime = string.Concat(Math.Round(schedule.Stops[i].DepartureTime.TotalHours, 0).ToString(), schedule.Stops[i].DepartureTime.ToString(@"hh\:mm\:ss").AsSpan(2, 6));
 
                         timeSpan = schedule.Stops[i].DepartureTime;
                     }
@@ -486,9 +456,7 @@ namespace TransXChange.Common.Helpers
                         stopTime.DropOffType = "1";
                     }
 
-                    string id = Guid.NewGuid().ToString();
-
-                    _stopTimes.Add(id, stopTime);
+                    _stopTimes.Add(Guid.NewGuid().ToString(), stopTime);
                 }
             }
 
@@ -499,7 +467,7 @@ namespace TransXChange.Common.Helpers
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
-                GTFSTrip trip = new GTFSTrip()
+                GTFSTrip trip = new()
                 {
                     RouteId = schedule.ServiceCode,
                     ServiceId = string.Format("{0}-{1}-{2}-{3}", schedule.ServiceCode, string.Format("{0}{1}{2}", schedule.Calendar.StartDate.ToString("yyyy"), schedule.Calendar.StartDate.ToString("MM"), schedule.Calendar.StartDate.ToString("dd")), string.Format("{0}{1}{2}", schedule.Calendar.EndDate.ToString("yyyy"), schedule.Calendar.EndDate.ToString("MM"), schedule.Calendar.EndDate.ToString("dd")), string.Format("{0}{1}{2}{3}{4}{5}{6}", schedule.Calendar.Monday.ToInt().ToString(), schedule.Calendar.Tuesday.ToInt().ToString(), schedule.Calendar.Wednesday.ToInt().ToString(), schedule.Calendar.Thursday.ToInt().ToString(), schedule.Calendar.Friday.ToInt().ToString(), schedule.Calendar.Saturday.ToInt().ToString(), schedule.Calendar.Sunday.ToInt().ToString())),
@@ -516,9 +484,7 @@ namespace TransXChange.Common.Helpers
                     trip.TripHeadsign = schedule.Stops.LastOrDefault().TravelineStop.CommonName;
                 }
 
-                string id = Guid.NewGuid().ToString();
-
-                _trips.Add(id, trip);
+                _trips.Add(Guid.NewGuid().ToString(), trip);
             }
 
             _trips = _trips.OrderBy(t => t.Value.TripId).ToDictionary(t => t.Key, t => t.Value);

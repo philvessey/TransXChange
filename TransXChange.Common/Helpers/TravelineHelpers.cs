@@ -14,9 +14,9 @@ namespace TransXChange.Common.Helpers
 {
     public class TravelineHelpers
     {
-        public Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
+        public static Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
-            Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
+            Dictionary<string, TXCSchedule> dictionary = [];
 
             if (path.EndsWith(".zip"))
             {
@@ -34,7 +34,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    using StreamReader reader = new(entry.Open());
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -333,7 +333,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.Name.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry.Open());
+                                using StreamReader reader = new(entry.Open());
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)
@@ -646,7 +646,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry);
+                                    using StreamReader reader = new(entry);
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -945,7 +945,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry);
+                                using StreamReader reader = new(entry);
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)
@@ -1246,9 +1246,9 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
+        public static Dictionary<string, TXCSchedule> ReadScotland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
-            Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
+            Dictionary<string, TXCSchedule> dictionary = [];
 
             if (path.EndsWith(".zip"))
             {
@@ -1266,7 +1266,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    using StreamReader reader = new(entry.Open());
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -1565,7 +1565,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.Name.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry.Open());
+                                using StreamReader reader = new(entry.Open());
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)
@@ -1878,7 +1878,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry);
+                                    using StreamReader reader = new(entry);
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -2177,7 +2177,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry);
+                                using StreamReader reader = new(entry);
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)
@@ -2478,9 +2478,9 @@ namespace TransXChange.Common.Helpers
             return dictionary;
         }
 
-        public Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
+        public static Dictionary<string, TXCSchedule> ReadWales(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
-            Dictionary<string, TXCSchedule> dictionary = new Dictionary<string, TXCSchedule>();
+            Dictionary<string, TXCSchedule> dictionary = [];
 
             if (path.EndsWith(".zip"))
             {
@@ -2498,7 +2498,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.Name.StartsWith(index) && entry.Name.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry.Open());
+                                    using StreamReader reader = new(entry.Open());
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -2797,7 +2797,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.Name.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry.Open());
+                                using StreamReader reader = new(entry.Open());
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)
@@ -3110,7 +3110,7 @@ namespace TransXChange.Common.Helpers
                             {
                                 if (entry.StartsWith(index) && entry.EndsWith(".xml"))
                                 {
-                                    using StreamReader reader = new StreamReader(entry);
+                                    using StreamReader reader = new(entry);
                                     TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                     if (xml.VehicleJourneys == null)
@@ -3409,7 +3409,7 @@ namespace TransXChange.Common.Helpers
                         {
                             if (entry.EndsWith(".xml"))
                             {
-                                using StreamReader reader = new StreamReader(entry);
+                                using StreamReader reader = new(entry);
                                 TXCXmlTransXChange xml = new XmlSerializer(typeof(TXCXmlTransXChange)).Deserialize(reader) as TXCXmlTransXChange;
 
                                 if (xml.VehicleJourneys == null)

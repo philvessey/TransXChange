@@ -27,14 +27,14 @@ namespace TransXChange.Wales
 
             try
             {
-                GtfsHelpers gtfsHelpers = new GtfsHelpers();
-                NaptanHelpers naptanHelpers = new NaptanHelpers();
-                TravelineHelpers travelineHelpers = new TravelineHelpers();
+                GtfsHelpers gtfsHelpers = new();
+                NaptanHelpers naptanHelpers = new();
+                TravelineHelpers travelineHelpers = new();
 
-                Dictionary<string, NAPTANStop> stops = naptanHelpers.Read(options.Naptan);
+                Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read(options.Naptan);
                 Console.WriteLine(string.Format("READ: National Public Transport Access Nodes (NaPTAN). Found {0:#,##0.##} stops.", stops.Count));
 
-                Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadWales(stops, options.Traveline, options.Key, options.Mode, options.Indexes, options.Filters, options.Date, options.Days);
+                Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadWales(stops, options.Traveline, options.Key, options.Mode, options.Indexes, options.Filters, options.Date, options.Days);
                 Console.WriteLine(string.Format("READ: Traveline National Dataset (TNDS). Found {0:#,##0.##} schedules.", schedules.Count));
 
                 Directory.CreateDirectory(options.Output);

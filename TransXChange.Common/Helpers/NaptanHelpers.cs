@@ -1,4 +1,5 @@
 ﻿using CsvHelper;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -9,9 +10,9 @@ namespace TransXChange.Common.Helpers
 {
     public class NaptanHelpers
     {
-        public Dictionary<string, NAPTANStop> Read(string path)
+        public static Dictionary<string, NAPTANStop> Read(string path)
         {
-            Dictionary<string, NAPTANStop> dictionary = new Dictionary<string, NAPTANStop>();
+            Dictionary<string, NAPTANStop> dictionary = [];
 
             if (path.EndsWith(".zip"))
             {
@@ -21,9 +22,9 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.ToLower().Contains("stops") && entry.Name.ToLower().EndsWith(".csv"))
+                        if (entry.Name.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.Name.ToLower().EndsWith(".csv"))
                         {
-                            using StreamReader reader = new StreamReader(entry.Open());
+                            using StreamReader reader = new(entry.Open());
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
 
                             foreach (NAPTANStop stop in results)
@@ -38,7 +39,7 @@ namespace TransXChange.Common.Helpers
             {
                 if (File.Exists(path))
                 {
-                    using StreamReader reader = new StreamReader(path);
+                    using StreamReader reader = new(path);
                     IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
 
                     foreach (NAPTANStop stop in results)
@@ -55,9 +56,9 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.ToLower().Contains("stops") && entry.ToLower().EndsWith(".csv"))
+                        if (entry.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.ToLower().EndsWith(".csv"))
                         {
-                            using StreamReader reader = new StreamReader(entry);
+                            using StreamReader reader = new(entry);
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
 
                             foreach (NAPTANStop stop in results)

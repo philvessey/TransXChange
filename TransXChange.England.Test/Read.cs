@@ -12,11 +12,11 @@ namespace TransXChange.England.Test
         [TestMethod]
         public void Naptan()
         {
-            GtfsHelpers gtfsHelpers = new GtfsHelpers();
-            NaptanHelpers naptanHelpers = new NaptanHelpers();
-            TravelineHelpers travelineHelpers = new TravelineHelpers();
+            GtfsHelpers gtfsHelpers = new();
+            NaptanHelpers naptanHelpers = new();
+            TravelineHelpers travelineHelpers = new();
             
-            Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
+            Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/manchester.csv");
 
             Assert.IsTrue(stops.Count > 0);
         }
@@ -24,12 +24,12 @@ namespace TransXChange.England.Test
         [TestMethod]
         public void Traveline()
         {
-            GtfsHelpers gtfsHelpers = new GtfsHelpers();
-            NaptanHelpers naptanHelpers = new NaptanHelpers();
-            TravelineHelpers travelineHelpers = new TravelineHelpers();
+            GtfsHelpers gtfsHelpers = new();
+            NaptanHelpers naptanHelpers = new();
+            TravelineHelpers travelineHelpers = new();
             
-            Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
-            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, "22/04/2024", 7);
+            Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/manchester.csv");
+            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, "22/04/2024", 7);
 
             Assert.IsTrue(schedules.Count > 0);
         }
