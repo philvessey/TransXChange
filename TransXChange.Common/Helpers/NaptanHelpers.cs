@@ -22,7 +22,7 @@ namespace TransXChange.Common.Helpers
 
                     foreach (ZipArchiveEntry entry in archive.Entries)
                     {
-                        if (entry.Name.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.Name.ToLower().EndsWith(".csv"))
+                        if (entry.Name.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.Name.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase))
                         {
                             using StreamReader reader = new(entry.Open());
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
@@ -56,7 +56,7 @@ namespace TransXChange.Common.Helpers
 
                     foreach (string entry in entries)
                     {
-                        if (entry.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.ToLower().EndsWith(".csv"))
+                        if (entry.Contains("stops", StringComparison.CurrentCultureIgnoreCase) && entry.EndsWith(".csv", StringComparison.CurrentCultureIgnoreCase))
                         {
                             using StreamReader reader = new(entry);
                             IEnumerable<NAPTANStop> results = new CsvReader(reader, CultureInfo.InvariantCulture).GetRecords<NAPTANStop>();
