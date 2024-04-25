@@ -29,7 +29,7 @@ namespace TransXChange.Scotland.Test
             TravelineHelpers travelineHelpers = new();
             
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "6200206531" }, "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             Assert.IsTrue(schedules.Count > 0);
         }

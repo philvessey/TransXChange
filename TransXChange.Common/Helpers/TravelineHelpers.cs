@@ -65,18 +65,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -166,9 +158,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -364,18 +356,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -465,9 +449,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -677,18 +661,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -778,9 +754,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -976,18 +952,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -1077,9 +1045,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -1297,18 +1265,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -1398,9 +1358,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -1596,18 +1556,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -1697,9 +1649,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -1909,18 +1861,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -2010,9 +1954,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -2208,18 +2152,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -2309,9 +2245,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -2529,18 +2465,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -2630,9 +2558,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -2828,18 +2756,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -2929,9 +2849,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -3141,18 +3061,10 @@ namespace TransXChange.Common.Helpers
                                         }
 
                                         TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                        if (journeyPattern == null)
-                                        {
-                                            journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                        }
+                                        journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                         TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                        if (operatingProfile == null)
-                                        {
-                                            operatingProfile = xml.Services.Service.OperatingProfile;
-                                        }
+                                        operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                         TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -3242,9 +3154,9 @@ namespace TransXChange.Common.Helpers
                                             }
                                         }
 
-                                        calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                        calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                        calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                        calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                         TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
@@ -3440,18 +3352,10 @@ namespace TransXChange.Common.Helpers
                                     }
 
                                     TXCXmlJourneyPattern journeyPattern = xml.Services.Service.StandardService.JourneyPattern.Where(p => p.Id == journeyPatternReference).FirstOrDefault();
-
-                                    if (journeyPattern == null)
-                                    {
-                                        journeyPattern = xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
-                                    }
+                                    journeyPattern ??= xml.Services.Service.StandardService.JourneyPattern.FirstOrDefault();
 
                                     TXCXmlOperatingProfile operatingProfile = vehicleJourney.OperatingProfile;
-
-                                    if (operatingProfile == null)
-                                    {
-                                        operatingProfile = xml.Services.Service.OperatingProfile;
-                                    }
+                                    operatingProfile ??= xml.Services.Service.OperatingProfile;
 
                                     TXCCalendar calendar = CalendarUtils.Build(operatingProfile, startDate.Value, endDate.Value);
 
@@ -3541,9 +3445,9 @@ namespace TransXChange.Common.Helpers
                                         }
                                     }
 
-                                    calendar.RunningDates = calendar.RunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementRunningDates = calendar.SupplementRunningDates.Distinct().OrderBy(d => d).ToList();
-                                    calendar.SupplementNonRunningDates = calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d).ToList();
+                                    calendar.RunningDates = [.. calendar.RunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementRunningDates = [.. calendar.SupplementRunningDates.Distinct().OrderBy(d => d)];
+                                    calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
                                     TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
