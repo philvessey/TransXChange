@@ -1,6 +1,6 @@
 ﻿namespace TransXChange.Common.Models
 {
-    public class TRAVELINEStop
+    public class TRANSXCHANGEStop
     {
         public string StopPointReference { get; set; }
         public string CommonName { get; set; }

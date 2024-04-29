@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using TransXChange.Common.Extensions;
 using TransXChange.Common.Models;
 
@@ -20,9 +19,9 @@ namespace TransXChange.Common.Utils
                 Sunday = false,
                 StartDate = startDate,
                 EndDate = endDate,
-                RunningDates = new List<DateTime>(),
-                SupplementRunningDates = new List<DateTime>(),
-                SupplementNonRunningDates = new List<DateTime>()
+                RunningDates = [],
+                SupplementRunningDates = [],
+                SupplementNonRunningDates = []
             };
 
             if (operatingProfile.RegularDayType.DaysOfWeek != null)

@@ -13,7 +13,7 @@ namespace TransXChange.Common.Utils
             {
                 ATCOCode = stopPoint.StopPointRef,
                 NaptanStop = GetNaptan(stops, stopPoint.StopPointRef, stopPoint.CommonName ?? "Unknown NaPTAN Stop", stopPoint.LocalityName ?? "Unknown NaPTAN Locality"),
-                TravelineStop = GetTraveline(stops, stopPoint.StopPointRef, stopPoint.CommonName ?? "Unknown Traveline Stop", stopPoint.LocalityName ?? "Unknown Traveline Locality")
+                TransXChangeStop = GetTransXChange(stops, stopPoint.StopPointRef, stopPoint.CommonName ?? "Unknown TransXChange Stop", stopPoint.LocalityName ?? "Unknown TransXChange Locality")
             };
         }
 
@@ -52,15 +52,15 @@ namespace TransXChange.Common.Utils
                     {
                         foreach (string filter in filters)
                         {
-                            if (stop.TravelineStop.StopPointReference.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                            if (stop.TransXChangeStop.StopPointReference.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.TravelineStop.CommonName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                            else if (stop.TransXChangeStop.CommonName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
-                            else if (stop.TravelineStop.LocalityName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
+                            else if (stop.TransXChangeStop.LocalityName.Contains(filter, StringComparison.CurrentCultureIgnoreCase))
                             {
                                 return true;
                             }
@@ -177,9 +177,9 @@ namespace TransXChange.Common.Utils
             return result;
         }
 
-        private static TRAVELINEStop GetTraveline(Dictionary<string, NAPTANStop> stops, string reference, string commonName, string localityName)
+        private static TRANSXCHANGEStop GetTransXChange(Dictionary<string, NAPTANStop> stops, string reference, string commonName, string localityName)
         {
-            return new TRAVELINEStop()
+            return new TRANSXCHANGEStop()
             {
                 StopPointReference = reference,
                 CommonName = commonName,

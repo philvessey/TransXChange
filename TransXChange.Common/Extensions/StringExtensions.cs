@@ -16,11 +16,11 @@ namespace TransXChange.Common.Extensions
             }
         }
 
-        public static DateTime? ToDateTimeFromTraveline(this string baseString)
+        public static DateTime? ToDateTimeFromTransXChange(this string baseString)
         {
             if (baseString != null)
             {
-                int year = int.Parse(baseString.Substring(0, 4));
+                int year = int.Parse(baseString[..4]);
                 int month = int.Parse(baseString.Substring(5, 2));
                 int day = int.Parse(baseString.Substring(8, 2));
 
@@ -32,11 +32,11 @@ namespace TransXChange.Common.Extensions
             }
         }
 
-        public static TimeSpan? ToTimeSpanFromTraveline(this string baseString)
+        public static TimeSpan? ToTimeSpanFromTransXChange(this string baseString)
         {
             if (baseString != null)
             {
-                int hour = int.Parse(baseString.Substring(0, 2));
+                int hour = int.Parse(baseString[..2]);
                 int minute = int.Parse(baseString.Substring(3, 2));
                 int second = int.Parse(baseString.Substring(6, 2));
 

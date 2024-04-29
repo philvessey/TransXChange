@@ -12,25 +12,17 @@ namespace TransXChange.England.Test
         [TestMethod]
         public void Naptan()
         {
-            GtfsHelpers gtfsHelpers = new GtfsHelpers();
-            NaptanHelpers naptanHelpers = new NaptanHelpers();
-            TravelineHelpers travelineHelpers = new TravelineHelpers();
+            Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/manchester.csv");
             
-            Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
-
             Assert.IsTrue(stops.Count > 0);
         }
 
         [TestMethod]
-        public void Traveline()
+        public void TransXChange()
         {
-            GtfsHelpers gtfsHelpers = new GtfsHelpers();
-            NaptanHelpers naptanHelpers = new NaptanHelpers();
-            TravelineHelpers travelineHelpers = new TravelineHelpers();
+            Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/manchester.csv");
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["1800EB01341"], "22/04/2024", 7);
             
-            Dictionary<string, NAPTANStop> stops = naptanHelpers.Read("Data/manchester.csv");
-            Dictionary<string, TXCSchedule> schedules = travelineHelpers.ReadEngland(stops, "Data/NW.zip", Environment.GetEnvironmentVariable("KEY"), "bus", new[] { "all" }, new[] { "1800EB01341" }, "22/04/2024", 7);
-
             Assert.IsTrue(schedules.Count > 0);
         }
     }

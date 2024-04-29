@@ -551,7 +551,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "New Year's Day",
                     EnglishName = "New Year's Day",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -581,7 +581,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "New Year's Day",
                     EnglishName = "New Year's Day",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -695,7 +695,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "Saint Andrew's Day",
                     EnglishName = "Saint Andrew's Day",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -725,7 +725,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "Christmas Eve",
                     EnglishName = "Christmas Eve",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -741,7 +741,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "Christmas Day",
                     EnglishName = "Christmas Day",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -771,7 +771,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "Boxing Day",
                     EnglishName = "St. Stephen's Day",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
@@ -801,7 +801,7 @@ namespace TransXChange.Common.Utils
                     LocalName = "New Year's Eve",
                     EnglishName = "New Year's Eve",
                     CountryCode = CountryCode.GB
-                },
+                }
             ];
 
             return results;
