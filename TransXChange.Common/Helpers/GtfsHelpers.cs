@@ -11,15 +11,15 @@ namespace TransXChange.Common.Helpers
 {
     public class GtfsHelpers
     {
-        private Dictionary<string, GTFSAgency> _agencies = [];
-        private Dictionary<string, GTFSCalendar> _calendars = [];
-        private Dictionary<string, GTFSCalendarDate> _calendarDates = [];
-        private Dictionary<string, GTFSRoute> _routes = [];
-        private Dictionary<string, GTFSStop> _stops = [];
-        private Dictionary<string, GTFSStopTime> _stopTimes = [];
-        private Dictionary<string, GTFSTrip> _trips = [];
+        private static Dictionary<string, GTFSAgency> _agencies = [];
+        private static Dictionary<string, GTFSCalendar> _calendars = [];
+        private static Dictionary<string, GTFSCalendarDate> _calendarDates = [];
+        private static Dictionary<string, GTFSRoute> _routes = [];
+        private static Dictionary<string, GTFSStop> _stops = [];
+        private static Dictionary<string, GTFSStopTime> _stopTimes = [];
+        private static Dictionary<string, GTFSTrip> _trips = [];
 
-        public void WriteAgency(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteAgency(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareAgency(schedules);
 
@@ -36,7 +36,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteCalendar(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteCalendar(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareCalendar(schedules);
 
@@ -53,7 +53,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteCalendarDates(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteCalendarDates(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareCalendarDates(schedules);
 
@@ -70,7 +70,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteRoutes(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteRoutes(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareRoutes(schedules);
 
@@ -87,7 +87,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteStops(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteStops(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareStops(schedules);
 
@@ -104,7 +104,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteStopTimes(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteStopTimes(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareStopTimes(schedules);
 
@@ -121,7 +121,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        public void WriteTrips(Dictionary<string, TXCSchedule> schedules, string path)
+        public static void WriteTrips(Dictionary<string, TXCSchedule> schedules, string path)
         {
             PrepareTrips(schedules);
 
@@ -138,7 +138,7 @@ namespace TransXChange.Common.Helpers
             }
         }
 
-        private void PrepareAgency(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareAgency(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -160,7 +160,7 @@ namespace TransXChange.Common.Helpers
             _agencies = _agencies.OrderBy(a => a.Value.AgencyId).ToDictionary(a => a.Key, a => a.Value);
         }
 
-        private void PrepareCalendar(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareCalendar(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -184,7 +184,7 @@ namespace TransXChange.Common.Helpers
             _calendars = _calendars.OrderBy(c => c.Value.ServiceId).ToDictionary(c => c.Key, c => c.Value);
         }
 
-        private void PrepareCalendarDates(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareCalendarDates(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -216,7 +216,7 @@ namespace TransXChange.Common.Helpers
             _calendarDates = _calendarDates.OrderBy(c => c.Value.ServiceId).ToDictionary(c => c.Key, c => c.Value);
         }
 
-        private void PrepareRoutes(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareRoutes(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -235,7 +235,7 @@ namespace TransXChange.Common.Helpers
             _routes = _routes.OrderBy(r => r.Value.RouteId).ToDictionary(r => r.Key, r => r.Value);
         }
 
-        private void PrepareStops(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareStops(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -252,7 +252,7 @@ namespace TransXChange.Common.Helpers
                     }
                     else
                     {
-                        stop.StopId = schedule.Stops[i].TravelineStop.StopPointReference;
+                        stop.StopId = schedule.Stops[i].TransXChangeStop.StopPointReference;
                     }
 
                     if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
@@ -270,7 +270,7 @@ namespace TransXChange.Common.Helpers
                     }
                     else
                     {
-                        stop.StopName = schedule.Stops[i].TravelineStop.CommonName;
+                        stop.StopName = schedule.Stops[i].TransXChangeStop.CommonName;
                     }
 
                     if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
@@ -279,7 +279,7 @@ namespace TransXChange.Common.Helpers
                     }
                     else
                     {
-                        stop.StopDesc = schedule.Stops[i].TravelineStop.LocalityName;
+                        stop.StopDesc = schedule.Stops[i].TransXChangeStop.LocalityName;
                     }
 
                     if (!string.IsNullOrEmpty(schedule.Stops[i].NaptanStop.StopType))
@@ -394,7 +394,7 @@ namespace TransXChange.Common.Helpers
             _stops = _stops.OrderBy(s => s.Value.StopId).ToDictionary(s => s.Key, s => s.Value);
         }
 
-        private void PrepareStopTimes(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareStopTimes(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -432,7 +432,7 @@ namespace TransXChange.Common.Helpers
                     }
                     else
                     {
-                        stopTime.StopId = schedule.Stops[i].TravelineStop.StopPointReference;
+                        stopTime.StopId = schedule.Stops[i].TransXChangeStop.StopPointReference;
                     }
 
                     if (schedule.Stops[i].Activity == "pickUp")
@@ -463,7 +463,7 @@ namespace TransXChange.Common.Helpers
             _stopTimes = _stopTimes.OrderBy(s => s.Value.TripId).ToDictionary(s => s.Key, s => s.Value);
         }
 
-        private void PrepareTrips(Dictionary<string, TXCSchedule> schedules)
+        private static void PrepareTrips(Dictionary<string, TXCSchedule> schedules)
         {
             foreach (TXCSchedule schedule in schedules.Values)
             {
@@ -481,7 +481,7 @@ namespace TransXChange.Common.Helpers
                 }
                 else
                 {
-                    trip.TripHeadsign = schedule.Stops.LastOrDefault().TravelineStop.CommonName;
+                    trip.TripHeadsign = schedule.Stops.LastOrDefault().TransXChangeStop.CommonName;
                 }
 
                 _trips.Add(Guid.NewGuid().ToString(), trip);

@@ -5,11 +5,11 @@ namespace TransXChange.Common.Models
 {
     public class COMMANDOption
     {
-        [Option('n', "naptan", Required = true, HelpText = "Path to NaPTAN csv .zip or directory.")]
+        [Option('n', "naptan", Required = true, HelpText = "Path to NaPTAN .csv .zip or directory.")]
         public string Naptan { get; set; }
 
-        [Option('t', "traveline", Required = true, HelpText = "Path to regional Traveline TNDS .zip or directory.")]
-        public string Traveline { get; set; }
+        [Option('t', "transxchange", Required = true, HelpText = "Path to TransXChange .zip or directory.")]
+        public string TransXChange { get; set; }
 
         [Option('o', "output", Required = true, HelpText = "Path to output directory.")]
         public string Output { get; set; }

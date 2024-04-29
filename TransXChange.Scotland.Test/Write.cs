@@ -14,15 +14,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void Agency()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteAgency(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteAgency(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "agency.txt")));
         }
@@ -30,15 +26,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void Calendar()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteCalendar(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteCalendar(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "calendar.txt")));
         }
@@ -46,15 +38,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void CalendarDates()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteCalendarDates(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteCalendarDates(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "calendar_dates.txt")));
         }
@@ -62,15 +50,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void Routes()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteRoutes(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteRoutes(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "routes.txt")));
         }
@@ -78,15 +62,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void Stops()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteStops(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteStops(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "stops.txt")));
         }
@@ -94,15 +74,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void StopTimes()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteStopTimes(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteStopTimes(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "stop_times.txt")));
         }
@@ -110,15 +86,11 @@ namespace TransXChange.Scotland.Test
         [TestMethod]
         public void Trips()
         {
-            GtfsHelpers gtfsHelpers = new();
-            NaptanHelpers naptanHelpers = new();
-            TravelineHelpers travelineHelpers = new();
-            
             Dictionary<string, NAPTANStop> stops = NaptanHelpers.Read("Data/edinburgh.csv");
-            Dictionary<string, TXCSchedule> schedules = TravelineHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
+            Dictionary<string, TXCSchedule> schedules = TransXChangeHelpers.ReadScotland(stops, "Data/S.zip", Environment.GetEnvironmentVariable("KEY"), "bus", ["all"], ["6200206531"], "22/04/2024", 7);
 
             DirectoryInfo localDirectory = Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[new Random().Next(s.Length)]).ToArray())));
-            gtfsHelpers.WriteTrips(schedules, localDirectory.FullName);
+            GtfsHelpers.WriteTrips(schedules, localDirectory.FullName);
 
             Assert.IsTrue(File.Exists(Path.Combine(localDirectory.FullName, "trips.txt")));
         }

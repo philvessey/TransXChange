@@ -16,7 +16,7 @@ namespace TransXChange.Common.Extensions
             }
         }
 
-        public static DateTime? ToDateTimeFromTraveline(this string baseString)
+        public static DateTime? ToDateTimeFromTransXChange(this string baseString)
         {
             if (baseString != null)
             {
@@ -32,7 +32,7 @@ namespace TransXChange.Common.Extensions
             }
         }
 
-        public static TimeSpan? ToTimeSpanFromTraveline(this string baseString)
+        public static TimeSpan? ToTimeSpanFromTransXChange(this string baseString)
         {
             if (baseString != null)
             {

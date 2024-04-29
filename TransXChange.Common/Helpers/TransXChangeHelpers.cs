@@ -12,7 +12,7 @@ using TransXChange.Common.Utils;
 
 namespace TransXChange.Common.Helpers
 {
-    public class TravelineHelpers
+    public class TransXChangeHelpers
     {
         public static Dictionary<string, TXCSchedule> ReadEngland(Dictionary<string, NAPTANStop> stops, string path, string key, string mode, IEnumerable<string> indexes, IEnumerable<string> filters, string date, int days)
         {
@@ -44,8 +44,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -121,8 +121,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -140,8 +140,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -163,8 +163,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -335,8 +335,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -412,8 +412,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -431,8 +431,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -454,8 +454,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -640,8 +640,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -717,8 +717,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -736,8 +736,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -759,8 +759,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -931,8 +931,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -1008,8 +1008,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1027,8 +1027,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1050,8 +1050,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -1244,8 +1244,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -1321,8 +1321,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1340,8 +1340,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1363,8 +1363,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -1535,8 +1535,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -1612,8 +1612,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1631,8 +1631,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -1654,8 +1654,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -1840,8 +1840,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -1917,8 +1917,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1936,8 +1936,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -1959,8 +1959,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -2131,8 +2131,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -2208,8 +2208,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2227,8 +2227,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2250,8 +2250,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -2444,8 +2444,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -2521,8 +2521,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -2540,8 +2540,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -2563,8 +2563,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -2735,8 +2735,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -2812,8 +2812,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2831,8 +2831,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -2854,8 +2854,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -3040,8 +3040,8 @@ namespace TransXChange.Common.Helpers
 
                                     foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                     {
-                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                        DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                        DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                         if (startDate == null || endDate == null)
                                         {
@@ -3117,8 +3117,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -3136,8 +3136,8 @@ namespace TransXChange.Common.Helpers
 
                                             if (daysOfNonOperation != null)
                                             {
-                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                                startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                                endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                                 if (startDate != null && endDate != null)
                                                 {
@@ -3159,8 +3159,8 @@ namespace TransXChange.Common.Helpers
                                         calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                         TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                        TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                        TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                         List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 
@@ -3331,8 +3331,8 @@ namespace TransXChange.Common.Helpers
 
                                 foreach (TXCXmlVehicleJourney vehicleJourney in xml.VehicleJourneys.VehicleJourney)
                                 {
-                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                    DateTime? startDate = DateTimeUtils.GetStartDate(xml.Services.Service.OperatingPeriod.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                    DateTime? endDate = DateTimeUtils.GetEndDate(xml.Services.Service.OperatingPeriod.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                     if (startDate == null || endDate == null)
                                     {
@@ -3408,8 +3408,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -3427,8 +3427,8 @@ namespace TransXChange.Common.Helpers
 
                                         if (daysOfNonOperation != null)
                                         {
-                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTraveline(), scheduleDate, days);
-                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTraveline(), scheduleDate, days);
+                                            startDate = DateTimeUtils.GetStartDate(daysOfNonOperation.DateRange.StartDate.ToDateTimeFromTransXChange(), scheduleDate, days);
+                                            endDate = DateTimeUtils.GetEndDate(daysOfNonOperation.DateRange.EndDate.ToDateTimeFromTransXChange(), scheduleDate, days);
 
                                             if (startDate != null && endDate != null)
                                             {
@@ -3450,8 +3450,8 @@ namespace TransXChange.Common.Helpers
                                     calendar.SupplementNonRunningDates = [.. calendar.SupplementNonRunningDates.Distinct().OrderBy(d => d)];
 
                                     TXCSchedule schedule = ScheduleUtils.Build(xml.Operators.Operator, xml.Services.Service, journeyPattern, calendar);
-                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
-                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTraveline();
+                                    TimeSpan? arrivalTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
+                                    TimeSpan? departureTime = vehicleJourney.DepartureTime.ToTimeSpanFromTransXChange();
 
                                     List<TXCXmlAnnotatedStopPointRef> stopPoints = xml.StopPoints.AnnotatedStopPointRef;
 

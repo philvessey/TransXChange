@@ -9,6 +9,6 @@ namespace TransXChange.Common.Models
         public TimeSpan ArrivalTime { get; set; }
         public TimeSpan DepartureTime { get; set; }
         public NAPTANStop NaptanStop { get; set; }
-        public TRAVELINEStop TravelineStop { get; set; }
+        public TRANSXCHANGEStop TransXChangeStop { get; set; }
     }
 }
